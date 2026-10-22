@@ -5,12 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>BLOCK BREAKER</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  :root {
+    --led: #00f0ff;
+    --led2: #ff00cc;
+    --gold: #ffd700;
+    --dark: #050510;
+  }
+
   body {
-    background: #0a0a0f;
+    background: radial-gradient(ellipse at center, #0a0520 0%, #000008 100%);
     color: #fff;
-    font-family: 'Courier New', monospace;
+    font-family: 'Orbitron', 'Courier New', monospace;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -21,171 +29,160 @@
     -webkit-user-select: none;
   }
 
-  #header {
-    text-align: center;
-    margin-bottom: 12px;
-  }
-
-  #title {
-    font-size: 22px;
-    letter-spacing: 8px;
-    color: #e0e0e0;
-    font-weight: bold;
-  }
-
-  #stats {
+  /* ===== 筐体本体 ===== */
+  #cabinet {
     display: flex;
-    gap: 32px;
-    margin-top: 6px;
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: #888;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    filter: drop-shadow(0 0 40px rgba(0,200,255,0.3));
   }
 
-  #stats span { color: #fff; }
+  /* 上部パネル */
+  #cabinet-top {
+    width: 100%;
+    background: linear-gradient(180deg, #1a0a30 0%, #0d0520 100%);
+    border: 2px solid #2a1a50;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 14px 4px;
+    position: relative;
+    overflow: visible;
+  }
+  #cabinet-top::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(0,200,255,0.05) 30%,
+      rgba(255,0,200,0.05) 70%, transparent 100%);
+    animation: topSweep 4s ease-in-out infinite alternate;
+  }
+  @keyframes topSweep {
+    from { opacity: 0.5; } to { opacity: 1; }
+  }
 
+  #title-logo {
+    text-align: center;
+    font-size: clamp(16px, 4vw, 24px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(90deg, #00f0ff, #ff00cc, #ffd700, #00f0ff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleShine 3s linear infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 8px rgba(0,200,255,0.6));
+  }
+  @keyframes titleShine {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  #stats-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: clamp(9px, 2.2vw, 12px);
+    letter-spacing: 1px;
+    gap: 4px;
+  }
+  .stat-box {
+    flex: 1;
+    text-align: center;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,200,255,0.3);
+    border-radius: 4px;
+    padding: 3px 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,200,255,0.1), transparent);
+    animation: statSweep 2.5s ease-in-out infinite;
+  }
+  @keyframes statSweep { 0%,100% { left: -100%; } 50% { left: 150%; } }
+  .stat-label { color: rgba(0,200,255,0.7); font-size: 0.75em; }
+  .stat-val { color: #fff; font-weight: 700; font-size: 1.1em; }
+
+  /* LED装飾ライン */
+  #led-top {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #00f0ff, #ff00cc, #ffd700, #00ff88, #00f0ff);
+    background-size: 200% 100%;
+    animation: ledFlow 1.5s linear infinite;
+    box-shadow: 0 0 12px currentColor;
+  }
+  @keyframes ledFlow { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+
+  /* ===== サイドフレーム ===== */
+  #cabinet-middle {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .side-frame {
+    width: 14px;
+    background: linear-gradient(180deg, #1a0a30, #0a0018, #1a0a30);
+    border: 2px solid #2a1a50;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .side-frame.left { border-right: none; border-left-color: rgba(0,200,255,0.6); }
+  .side-frame.right { border-left: none; border-right-color: rgba(255,0,200,0.6); }
+
+  .side-leds {
+    position: absolute;
+    inset: 4px 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .side-led-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #00f0ff;
+    box-shadow: 0 0 6px #00f0ff;
+    animation: ledPulse 1s ease-in-out infinite;
+  }
+  .side-led-dot:nth-child(2n) { background: #ff00cc; box-shadow: 0 0 6px #ff00cc; animation-delay: 0.3s; }
+  .side-led-dot:nth-child(3n) { background: #ffd700; box-shadow: 0 0 6px #ffd700; animation-delay: 0.6s; }
+  @keyframes ledPulse { 0%,100% { opacity:0.4; } 50% { opacity:1; } }
+
+  /* ===== ゲーム画面エリア ===== */
   #game-wrapper {
     position: relative;
-    border: 1px solid #333;
     background: #07070d;
+    border-top: 2px solid #1a1a3a;
+    border-bottom: 2px solid #1a1a3a;
+    outline: none;
   }
 
-  canvas {
-    display: block;
-  }
+  canvas { display: block; }
 
-  #overlay {
+  #combo-display {
     position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(7,7,13,0.92);
-    text-align: center;
-    padding: 24px;
-  }
-
-  #overlay h2 {
-    font-size: 28px;
-    letter-spacing: 6px;
-    margin-bottom: 16px;
-    color: #fff;
-  }
-
-  #overlay p {
+    top: 6px;
+    right: 8px;
     font-size: 13px;
-    color: #888;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-    line-height: 1.8;
-  }
-
-  #overlay .hint {
-    font-size: 11px;
-    color: #555;
-    margin-top: 12px;
-  }
-
-  .btn {
-    margin-top: 20px;
-    padding: 12px 32px;
-    background: transparent;
-    border: 1px solid #fff;
-    color: #fff;
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    letter-spacing: 4px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-  }
-  .btn:hover { background: #fff; color: #000; }
-
-  #powerup-bar {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    min-height: 28px;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .pu-badge {
-    font-size: 11px;
-    padding: 3px 10px;
-    border: 1px solid;
-    letter-spacing: 1px;
-    border-radius: 2px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
-  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.15; } }
-  .pu-badge.blinking { animation: blink 0.4s ease infinite; }
-
-  #qr-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(7,7,13,0.96);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-  }
-
-  #qr-overlay h2 {
-    font-size: 20px;
-    letter-spacing: 6px;
-    margin-bottom: 6px;
-    color: #fff;
-  }
-
-  #qr-overlay p {
-    font-size: 12px;
-    color: #666;
     letter-spacing: 2px;
-    margin-bottom: 20px;
+    font-weight: bold;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-family: 'Orbitron', monospace;
+    text-shadow: 0 0 10px currentColor;
   }
-
-  #qr-img {
-    image-rendering: pixelated;
-    border: 6px solid #fff;
-  }
-
-  #qr-overlay .hint {
-    margin-top: 14px;
-    font-size: 11px;
-    color: #444;
-    letter-spacing: 1px;
-  }
-
-  #mobile-controls {
-    display: none;
-    gap: 16px;
-    margin-top: 16px;
-  }
-
-  .mob-btn {
-    width: 80px;
-    height: 50px;
-    background: transparent;
-    border: 1px solid #444;
-    color: #aaa;
-    font-size: 22px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.1s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  .mob-btn:active { background: #222; color: #fff; }
-
-  @media (pointer: coarse) {
-    #mobile-controls { display: flex; }
-  }
+  #combo-display.active { opacity: 1; }
 
   #stage-intro {
     position: absolute;
@@ -194,175 +191,419 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    font-family: 'Courier New', monospace;
+    font-family: 'Orbitron', monospace;
     font-size: 48px;
-    font-weight: bold;
+    font-weight: 900;
     letter-spacing: 8px;
     color: #fff;
     opacity: 0;
-    transition: none;
-    text-shadow: 0 0 30px rgba(255,255,255,0.5);
+    text-shadow: 0 0 30px rgba(0,200,255,0.8), 0 0 60px rgba(0,200,255,0.4);
   }
 
-  #combo-display {
+  /* オーバーレイ共通 */
+  #overlay, #qr-overlay {
     position: absolute;
-    top: 6px;
-    right: 8px;
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: #f4e04d;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    pointer-events: none;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5,5,20,0.94);
+    text-align: center;
+    padding: 16px;
+    overflow-y: auto;
+    justify-content: safe center;
+  }
+  #qr-overlay { display: none; }
+
+  #overlay h2, #qr-overlay h2 {
+    font-size: clamp(18px, 5vw, 26px);
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #00f0ff, #ff00cc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Orbitron', monospace;
+  }
+  #overlay p { font-size: 11px; color: #888; margin-bottom: 6px; letter-spacing: 1px; line-height: 1.8; font-family: 'Courier New', monospace; }
+  #overlay .hint { font-size: 10px; color: #444; margin-top: 8px; font-family: 'Courier New', monospace; }
+
+  .btn {
+    margin-top: 14px;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid;
+    border-image: linear-gradient(90deg, #00f0ff, #ff00cc) 1;
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,240,255,0.15), rgba(255,0,204,0.15));
     opacity: 0;
     transition: opacity 0.2s;
   }
-  #combo-display.active { opacity: 1; }
+  .btn:hover::before { opacity: 1; }
 
+  /* アイテム一覧 */
   #item-list {
     width: 100%;
-    margin-top: 14px;
-    border-top: 1px solid #222;
-    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #1a1a3a;
+    padding-top: 8px;
   }
-
   #item-list .item-list-title {
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 3px;
-    color: #555;
-    margin-bottom: 8px;
-  }
-
-  .item-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: rgba(0,200,255,0.5);
     margin-bottom: 6px;
-    font-size: 11px;
+    font-family: 'Orbitron', monospace;
+  }
+  .item-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 11px; font-family: 'Courier New', monospace; }
+  .item-badge { padding: 2px 6px; border: 1px solid; border-radius: 2px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; min-width: 92px; text-align: center; }
+  .item-desc { color: #777; flex: 1; text-align: left; line-height: 1.4; }
+  .item-duration { color: #444; font-size: 9px; white-space: nowrap; }
+
+  /* ===== 下部パネル ===== */
+  #led-bottom {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(90deg, #ff00cc, #ffd700, #00ff88, #00f0ff, #ff00cc);
+    background-size: 200% 100%;
+    animation: ledFlow 1.5s linear infinite reverse;
   }
 
-  .item-badge {
+  #cabinet-bottom {
+    width: 100%;
+    background: linear-gradient(180deg, #0d0520 0%, #1a0a30 100%);
+    border: 2px solid #2a1a50;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 8px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #powerup-bar {
+    display: flex;
+    gap: 6px;
+    min-height: 22px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pu-badge {
+    font-size: 10px;
     padding: 2px 7px;
     border: 1px solid;
-    border-radius: 2px;
-    font-size: 10px;
     letter-spacing: 1px;
-    white-space: nowrap;
-    min-width: 90px;
-    text-align: center;
+    border-radius: 2px;
+    animation: fadeIn 0.3s ease;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 6px currentColor;
+    box-shadow: 0 0 6px -2px currentColor;
   }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.15; } }
+  .pu-badge.blinking { animation: blink 0.4s ease infinite; }
 
-  .item-desc {
-    color: #888;
-    flex: 1;
-    text-align: left;
-    line-height: 1.4;
+  /* モバイルボタン */
+  #mobile-controls {
+    display: none;
+    gap: 20px;
   }
+  .mob-btn {
+    width: 90px; height: 44px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(0,200,255,0.4);
+    color: rgba(0,200,255,0.9);
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.1s, box-shadow 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 0 8px rgba(0,200,255,0.2);
+  }
+  .mob-btn:active { background: rgba(0,200,255,0.2); box-shadow: 0 0 16px rgba(0,200,255,0.5); }
 
-  .item-duration {
-    color: #555;
+  #action-bar { display: none; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .act-btn {
+    font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px;
+    padding: 6px 12px; border-radius: 4px; cursor: pointer;
+    background: rgba(0,0,0,0.6); color: #888; border: 1px solid #444;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .act-btn.ready { color: #fff; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.6); animation: autoPulse 1s ease-in-out infinite; }
+  #actMagnet { color: #60a5fa; border-color: #60a5fa; }
+
+  @media (pointer: coarse) { #mobile-controls { display: flex; } }
+
+  /* 筐体フレームLEDアニメーション */
+  #auto-badge {
+    position: absolute;
+    top: 6px;
+    left: 8px;
     font-size: 10px;
-    white-space: nowrap;
+    padding: 2px 8px;
+    border: 1px solid #f4e04d;
+    color: #f4e04d;
+    letter-spacing: 2px;
+    border-radius: 2px;
+    font-family: 'Courier New', monospace;
+    animation: autoPulse 1s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
   }
+  @keyframes autoPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ===== アップグレード選択 ===== */
+  #upgrade-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(3,3,15,0.96);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    padding: 12px;
+  }
+  #upgrade-overlay h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(13px,4vw,20px);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg,#ffd700,#f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  #upgrade-overlay .up-sub {
+    font-size: 10px; color: #555; letter-spacing: 2px; margin-bottom: 12px; font-family:'Courier New',monospace;
+  }
+  .upgrade-cards { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .upgrade-card {
+    width: 120px; min-height: 130px;
+    border: 1px solid #333; border-radius: 6px;
+    background: rgba(10,10,30,0.9);
+    padding: 10px 8px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: 'Courier New', monospace;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .upgrade-card::before {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
+  }
+  .upgrade-card:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 0 20px var(--card-color); }
+  .upgrade-card .up-icon  { font-size: 26px; }
+  .upgrade-card .up-rarity{ font-size: 8px; letter-spacing: 2px; font-weight:bold; margin-bottom:2px; }
+  .upgrade-card .up-name  { font-size: 11px; font-weight:bold; color:#fff; line-height:1.3; }
+  .upgrade-card .up-desc  { font-size: 10px; color:#888; line-height:1.4; margin-top:2px; }
+  .upgrade-card .up-level { font-size: 9px; color:#ffd700; margin-top:4px; }
+
+  /* ===== アップグレードパネル（上部常時表示） ===== */
+  #upgrade-panel {
+    width: 100%; padding: 3px 8px 4px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid #2a1a50;
+    display: flex; flex-wrap: wrap; gap: 3px;
+    min-height: 18px; justify-content: center; align-items: center;
+    max-height: 80px; overflow-y: auto;
+  }
+  .up-badge {
+    font-size: 10px; padding: 1px 6px;
+    border: 1px solid; border-radius: 2px;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    text-shadow: 0 0 4px currentColor;
+  }
+
+  @keyframes cabinetGlow {
+    0%   { box-shadow: 0 0 20px rgba(0,200,255,0.4), 0 0 60px rgba(0,200,255,0.1); }
+    50%  { box-shadow: 0 0 30px rgba(255,0,200,0.5), 0 0 80px rgba(255,0,200,0.15); }
+    100% { box-shadow: 0 0 20px rgba(0,200,255,0.4), 0 0 60px rgba(0,200,255,0.1); }
+  }
+  #cabinet { animation: cabinetGlow 3s ease-in-out infinite; }
 </style>
 </head>
 <body>
 
-<div id="header">
-  <div id="title">BLOCK BREAKER</div>
-  <div id="stats">
-    STAGE <span id="stageVal">1</span> &nbsp;|&nbsp; SCORE <span id="scoreVal">0</span> &nbsp;|&nbsp; LIFE <span id="livesVal">3</span>
+<div id="cabinet">
+  <!-- 上部パネル -->
+  <div id="cabinet-top">
+    <div id="title-logo">BLOCK BREAKER</div>
+    <div id="stats-bar">
+      <div class="stat-box"><div class="stat-label">STAGE</div><div class="stat-val" id="stageVal">1</div></div>
+      <div class="stat-box"><div class="stat-label">SCORE</div><div class="stat-val" id="scoreVal">0</div></div>
+      <div class="stat-box"><div class="stat-label">LIFE</div><div class="stat-val" id="livesVal">3</div></div>
+      <div class="stat-box"><div class="stat-label">SPEED</div><div class="stat-val" id="speedVal">x1.00</div></div>
+    </div>
+    <div id="upgrade-panel"></div>
   </div>
-</div>
+  <div id="led-top"></div>
 
-<div id="game-wrapper">
-  <canvas id="canvas"></canvas>
+  <!-- ゲーム画面 + サイドフレーム -->
+  <div id="cabinet-middle">
+    <div class="side-frame left">
+      <div class="side-leds" id="side-leds-left"></div>
+    </div>
 
-  <div id="combo-display"></div>
-  <div id="stage-intro"></div>
+    <div id="game-wrapper">
+      <canvas id="canvas"></canvas>
+      <div id="combo-display"></div>
+      <div id="auto-badge">AUTO</div>
+      <div id="stage-intro"></div>
+      <div id="upgrade-overlay">
+        <h3>⬆ UPGRADE SELECT</h3>
+        <div class="up-sub">3つのアップグレードから1つ選択</div>
+        <div class="upgrade-cards" id="upgrade-cards"></div>
+      </div>
 
-  <div id="overlay">
-    <h2>BLOCK BREAKER</h2>
-    <p>全ブロック破壊でQRコードが出現！<br>特典動画をゲットしよう</p>
-    <p style="margin-top:6px;font-size:11px;color:#666;">PC: ← → キー &nbsp;|&nbsp; スマホ: 画面下ボタン or スワイプ</p>
+      <div id="overlay">
+        <h2>BLOCK BREAKER</h2>
+        <p>全ブロック破壊でQRコードが出現！<br>特典動画をゲットしよう</p>
+        <p style="margin-top:4px;font-size:11px;color:#8aa;">PC: ← → 移動 / SPACE 発射・ボム・分裂 / Z長押し マグネット / A オート / M BGM<br>スマホ: 画面スワイプ or 下ボタン・アイテムボタン<br>1万点ごとにアップグレード選択（最大999ステージ）</p>
+        <div id="item-list">
+          <div class="item-list-title">— POWER UP ITEMS —</div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#7ec8e3;border-color:#7ec8e3;">► WIDE BAR</span>
+            <span class="item-desc">バーが伸びる（最大3重ね）</span>
+            <span class="item-duration">12秒</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#f4e04d;border-color:#f4e04d;">⚡ SPEED UP</span>
+            <span class="item-desc">バーの移動速度アップ</span>
+            <span class="item-duration">10秒</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#f4a261;border-color:#f4a261;">✦ MULTI BALL</span>
+            <span class="item-desc">ボールが3つに分裂</span>
+            <span class="item-duration">永続</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#e76f51;border-color:#e76f51;">● FIRE BALL</span>
+            <span class="item-desc">ブロックを貫通する</span>
+            <span class="item-duration">8秒</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#57cc99;border-color:#57cc99;">▬ SHIELD</span>
+            <span class="item-desc">ミスを1回防ぐバリア</span>
+            <span class="item-duration">永続</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#ff6b6b;border-color:#ff6b6b;">💣 BOMB</span>
+            <span class="item-desc">周囲3マスを一括破壊</span>
+            <span class="item-duration">一発限り</span>
+          </div>
+          <div class="item-row">
+            <span class="item-badge" style="color:#c77dff;border-color:#c77dff;">⬤ BIG BALL</span>
+            <span class="item-desc">ボールが巨大化</span>
+            <span class="item-duration">10秒</span>
+          </div>
+        </div>
+        <button class="btn" id="startBtn">START</button>
+      </div>
 
-    <div id="item-list">
-      <div class="item-list-title">— POWER UP ITEMS —</div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#7ec8e3;border-color:#7ec8e3;">► WIDE BAR</span>
-        <span class="item-desc">バーが伸びる（最大3重ね）</span>
-        <span class="item-duration">12秒</span>
-      </div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#f4e04d;border-color:#f4e04d;">⚡ SPEED UP</span>
-        <span class="item-desc">バーの移動速度アップ</span>
-        <span class="item-duration">10秒</span>
-      </div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#f4a261;border-color:#f4a261;">✦ MULTI BALL</span>
-        <span class="item-desc">ボールが3つに分裂</span>
-        <span class="item-duration">永続</span>
-      </div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#e76f51;border-color:#e76f51;">● FIRE BALL</span>
-        <span class="item-desc">ブロックを貫通する</span>
-        <span class="item-duration">8秒</span>
-      </div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#57cc99;border-color:#57cc99;">▬ SHIELD</span>
-        <span class="item-desc">ミスを1回防ぐバリア</span>
-        <span class="item-duration">永続</span>
-      </div>
-      <div class="item-row">
-        <span class="item-badge" style="color:#ff6b6b;border-color:#ff6b6b;">💣 BOMB</span>
-        <span class="item-desc">当たったブロック周囲3マスを破壊</span>
-        <span class="item-duration">一発限り</span>
+      <div id="qr-overlay">
+        <h2>ALL CLEAR!</h2>
+        <p></p>
+        <canvas id="qr-img" width="180" height="180"></canvas>
+        <p class="hint">※ このQRコードはダミーです。実際のURLに差し替えてください。</p>
+        <button class="btn" id="replayBtn">REPLAY</button>
       </div>
     </div>
 
-    <button class="btn" id="startBtn">START</button>
+    <div class="side-frame right">
+      <div class="side-leds" id="side-leds-right"></div>
+    </div>
   </div>
 
-  <div id="qr-overlay">
-    <h2>CLEAR!</h2>
-    <p>QRコードをスキャンして特典動画へ</p>
-    <canvas id="qr-img" width="200" height="200"></canvas>
-    <p class="hint">※ このQRコードはダミーです。実際のURLに差し替えてください。</p>
-    <button class="btn" id="replayBtn">REPLAY</button>
+  <div id="led-bottom"></div>
+
+  <!-- 下部パネル -->
+  <div id="cabinet-bottom">
+    <div id="powerup-bar"></div>
+    <div id="action-bar">
+      <button class="act-btn" id="actBomb" tabindex="-1">💣 BOMB x0</button>
+      <button class="act-btn" id="actSplit" tabindex="-1">✦ SPLIT x0</button>
+      <button class="act-btn" id="actMagnet" tabindex="-1">🧲 HOLD</button>
+    </div>
+    <div id="mobile-controls">
+      <button class="mob-btn" id="leftBtn">◀</button>
+      <button class="mob-btn" id="rightBtn">▶</button>
+    </div>
+    <div id="util-row" style="display:flex;gap:8px;">
+    <button id="autoBtn" onclick="toggleAutoPlay()" style="
+      background:transparent;border:1px solid #555;color:#555;
+      font-family:'Courier New',monospace;font-size:10px;
+      letter-spacing:2px;padding:3px 12px;cursor:pointer;
+      border-radius:2px;transition:all 0.2s;
+    " onmouseover="this.style.borderColor='#f4e04d';this.style.color='#f4e04d'"
+       onmouseout="this.style.borderColor='#555';this.style.color='#555'">AUTO [ A ]</button>
+    <button id="muteBtn" onclick="toggleMute()" style="background:transparent;border:1px solid #555;color:#555;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;padding:3px 12px;cursor:pointer;border-radius:2px;">🔊 BGM ON [ M ]</button>
+    </div>
   </div>
-</div>
-
-<div id="powerup-bar"></div>
-
-<div id="mobile-controls">
-  <button class="mob-btn" id="leftBtn">◀</button>
-  <button class="mob-btn" id="rightBtn">▶</button>
 </div>
 
 <script>
 // ===== CONFIG =====
-const COLS = 14;
+const COLS = 16;
 const ROWS = 9;
 const BRICK_PAD = 3;
-const ITEM_CHANCE = 0.12; // item block probability
+const ITEM_CHANCE = 0.24; // item block probability
 
 // ===== CANVAS SETUP =====
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 function resize() {
-  const maxW = Math.min(window.innerWidth - 24, 480);
-  const maxH = Math.min(window.innerHeight - 180, 680);
-  const ratio = maxH / maxW;
+  const maxW = Math.min(window.innerWidth - 40, 440);
+  const maxH = Math.min(window.innerHeight - 240, 640);
   const W = Math.min(maxW, maxH / 1.4);
   const H = W * 1.4;
   canvas.width = W;
   canvas.height = H;
-  document.getElementById('game-wrapper').style.width = W + 'px';
-  document.getElementById('game-wrapper').style.height = H + 'px';
+  const gw = document.getElementById('game-wrapper');
+  if (gw) { gw.style.width = W + 'px'; gw.style.height = H + 'px'; }
+  const mid = document.getElementById('cabinet-middle');
+  if (mid) { mid.style.width = (W + 28) + 'px'; }
+  const top = document.getElementById('cabinet-top');
+  if (top) { top.style.width = (W + 28) + 'px'; }
+  const bot = document.getElementById('cabinet-bottom');
+  if (bot) { bot.style.width = (W + 28) + 'px'; }
+  const lt = document.getElementById('led-top');
+  if (lt) { lt.style.width = (W + 28) + 'px'; }
+  const lb = document.getElementById('led-bottom');
+  if (lb) { lb.style.width = (W + 28) + 'px'; }
 }
 resize();
-window.addEventListener('resize', () => { resize(); if (gameState === 'playing') initGame(false); });
+window.addEventListener('resize', () => {
+  const ow = canvas.width, oh = canvas.height;
+  resize();
+  const sx = canvas.width / ow, sy = canvas.height / oh;
+  if (!paddle || !bricks || (sx === 1 && sy === 1)) return;
+  bricks.forEach(b => { b.x *= sx; b.y *= sy; b.w *= sx; b.h *= sy; });
+  paddle.x *= sx; paddle.y *= sy; paddle.w *= sx; paddle.h *= sy;
+  paddle.baseW *= sx; paddle.speed *= sx; paddle.baseSpeed *= sx;
+  balls.forEach(b => { b.x *= sx; b.y *= sy; b.vx *= sx; b.vy *= sy; b.r *= sx; b.baseR *= sx; });
+  items.forEach(i => { i.x *= sx; i.y *= sy; i.w *= sx; i.h *= sy; i.vy *= sy; });
+  if (gameState !== 'playing') draw();
+});
 
 // ===== STATE =====
 let gameState = 'idle'; // idle | playing | dead | clear
@@ -371,11 +612,75 @@ let lastLifeBonus = 0; // tracks last 10000-threshold for life recovery
 let startTime = 0, clearTime = 0;
 let paddle, balls, bricks, items, activeEffects, particles;
 let combo = 0, comboTimer = null, comboPopups = [];
+let bricksDestroyed = 0;
+let upgrades = {};        // { id: level }
+let lastUpgradeThreshold = 0; // 何万点でアップグレード済みか
+let upgradeSelectOpen = false;
+let pendingUpgrades = 0, upgradeResume = false, pauseStart = 0;
+let pendingUpgradeChoices = []; // 表示する3択
+let dragonHitCount = 0;   // ドラゴン発動カウンタ
+let orbitAngle = 0;       // 旋回刃の角度
+let autoFireTimer = 0;    // 自動ファイヤーボール
+let chargeReady = { bomb: 0, split: 0 }; // チャージ系アイテム
 let bombExplosions = [];
+let screenShake = { x:0, y:0, mag:0, decay:0 };
+let vignette = 0;
+let flashEffect = { alpha:0, color:'#ffffff' };
+let ballTrails = [];
 let bgColor = { r:7, g:7, b:13 }; // dynamic background
 let stageAnim = null; // stage intro animation state
 let audioCtx = null;
+let cabinetLedColor = '#00f0ff';
+let cabinetLedIntensity = 1.0;
+let cabinetFlashTimer = null;
+
+// ===== CABINET LED SETUP =====
+function initCabinetLeds() {
+  ['side-leds-left','side-leds-right'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    for (let i = 0; i < 18; i++) {
+      const d = document.createElement('div');
+      d.className = 'side-led-dot';
+      d.style.animationDelay = (i * 0.08) + 's';
+      el.appendChild(d);
+    }
+  });
+}
+initCabinetLeds();
+
+function setCabinetLed(color, intensity, duration) {
+  cabinetLedColor = color;
+  cabinetLedIntensity = intensity;
+  const dots = document.querySelectorAll('.side-led-dot');
+  dots.forEach((d, i) => {
+    d.style.background = color;
+    d.style.boxShadow = `0 0 ${8 * intensity}px ${color}`;
+  });
+  const topLed = document.getElementById('led-top');
+  const botLed = document.getElementById('led-bottom');
+  if (topLed) { topLed.style.boxShadow = `0 0 ${16*intensity}px ${color}`; }
+  if (cabinetFlashTimer) clearTimeout(cabinetFlashTimer);
+  if (duration) {
+    cabinetFlashTimer = setTimeout(() => setCabinetLed('#00f0ff', 1.0), duration);
+  }
+}
+
+function pulseCabinetLed(color, times) {
+  let count = 0;
+  const interval = setInterval(() => {
+    const on = count % 2 === 0;
+    setCabinetLed(on ? color : '#0a0a2a', on ? 2.0 : 0.1);
+    count++;
+    if (count >= times * 2) {
+      clearInterval(interval);
+      setCabinetLed('#00f0ff', 1.0);
+    }
+  }, 100);
+}
 let keys = { left: false, right: false };
+let autoPlay = false;
 let touchX = null, lastTouchX = null;
 let animId;
 
@@ -387,42 +692,83 @@ const POWERUPS = [
   { id: 'thru',   label: '● FIRE BALL',   color: '#e76f51', duration: 8000  },
   { id: 'shield', label: '▬ SHIELD',      color: '#57cc99', duration: null  },
   { id: 'bomb',   label: '💣 BOMB',        color: '#ff6b6b', duration: null  },
+  { id: 'big',    label: '⬤ BIG BALL',    color: '#c77dff', duration: 10000 },
 ];
+
+// ===== UPGRADE DEFINITIONS =====
+const UPGRADE_DEFS = [
+  // アンコモン
+  { id:'pierce',      rarity:'uncommon', label:'貫通力アップ',       icon:'🔵', desc:'玉がブロックを貫通（Lv毎+1貫通）', color:'#7ec8e3' },
+  { id:'ballspeed',   rarity:'uncommon', label:'玉スピードアップ',    icon:'⚡', desc:'玉の速度永続+12%/Lv',              color:'#f4e04d' },
+  { id:'bomb_charge', rarity:'uncommon', label:'チャージボム',        icon:'💣', desc:'SPACE/ボタンでボム（取得毎+1回・毎ステージLv回まで補充）',     color:'#ff6b6b' },
+  { id:'wide_forever',rarity:'uncommon', label:'バー永続拡張',        icon:'↔️', desc:'バーが永続的に広がる（Lv毎+15%）',  color:'#7ec8e3' },
+  // レア
+  { id:'split_charge', rarity:'rare',    label:'チャージ分裂',        icon:'✦', desc:'SPACE/ボタンで分裂（取得毎+1回・毎ステージLv回まで補充）',     color:'#a78bfa' },
+  { id:'thunder',     rarity:'rare',     label:'サンダー',            icon:'⚡', desc:'破壊時に隣接ブロックにダメージ',     color:'#fbbf24' },
+  { id:'multipaddle', rarity:'rare',     label:'ダブルバー',          icon:'▬', desc:'バーが2段になる',                    color:'#34d399' },
+  // エピック
+  { id:'auto_fire',   rarity:'epic',     label:'オートファイヤー',    icon:'🔥', desc:'数秒おきに玉が一定時間ファイヤーボール化',        color:'#f97316' },
+  { id:'golden_ball', rarity:'epic',     label:'ゴールデンボール',    icon:'⭐', desc:'大貫通(+3/Lv)＋スコア1.5倍',               color:'#ffd700' },
+  { id:'magnet',      rarity:'epic',     label:'マグネット',          icon:'🧲', desc:'Z長押し(ボタン長押し)で吸着→離すと発射',        color:'#60a5fa' },
+  // レジェンダリー
+  { id:'orbit_blade', rarity:'legendary',label:'オービットブレード',  icon:'⚔️', desc:'玉周囲を旋回する刃',                 color:'#e879f9' },
+  { id:'explode',     rarity:'legendary',label:'炸裂付与',            icon:'💥', desc:'ブロック破壊時に10%×Lvで炸裂',          color:'#f43f5e' },
+  { id:'dragon',      rarity:'legendary',label:'ドラゴン召喚',        icon:'🐉', desc:'50回破壊でドラゴンが薙ぎ払う（Lv毎-5回）',     color:'#dc2626' },
+];
+
+const RARITY_WEIGHT = { uncommon:50, rare:30, epic:15, legendary:5 };
+const RARITY_COLOR  = { uncommon:'#7ec8e3', rare:'#a78bfa', epic:'#f97316', legendary:'#dc2626' };
+const RARITY_LABEL  = { uncommon:'UNCOMMON', rare:'RARE', epic:'EPIC', legendary:'LEGENDARY' };
 
 // ===== INIT =====
 function initGame(full = true) {
   const W = canvas.width, H = canvas.height;
-  if (full) { score = 0; lives = 3; stage = 1; startTime = 0; clearTime = 0; combo = 0; comboPopups = []; lastLifeBonus = 0; }
+  if (full) { score = 0; lives = 3; stage = 1; clearTime = 0; combo = 0; comboPopups = []; lastLifeBonus = 0; bricksDestroyed = 0; upgrades = {}; lastUpgradeThreshold = 0; dragonHitCount = 0; chargeReady = { bomb:0, split:0 }; pendingUpgrades = 0; upgradeResume = false; upgradeSelectOpen = false; pauseStart = 0; document.getElementById('upgrade-overlay').style.display = 'none'; }
+  startTime = 0; // ステージごとにリセット
   particles = [];
   bombExplosions = [];
+  ballTrails = [];
+  screenShake = { x:0, y:0, mag:0, decay:0.85 };
+  vignette = 0;
+  flashEffect = { alpha:0, color:'#ffffff' };
   bgColor = { r:7, g:7, b:13 };
+  setCabinetLed('#00f0ff', 1.0);
+  hitStop = 0; zoomPunch = 0;
 
-  const pw = W * 0.22;
+  const pw = W * 0.22 * Math.pow(1.15, upgrades.wide_forever || 0);
   const ph = H * 0.022;
   paddle = {
     x: W / 2 - pw / 2,
     y: H - H * 0.08,
     w: pw, h: ph,
     baseW: pw,
-    speed: W * 0.012,
-    baseSpeed: W * 0.012,
+    speed: W * 0.024,
+    baseSpeed: W * 0.024,
     hasShield: false,
     shieldY: 0
   };
 
-  const speedTable = [1.0, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5];
-  const stageSpeedMult = speedTable[Math.min(stage - 1, 9)];
-  const bSpeed = H * 0.006 * stageSpeedMult;
+  const stageSpeedMult = Math.min(1.0 + (stage - 1) * 0.04, 3.0);
+  const bSpeed = H * 0.012 * stageSpeedMult * Math.pow(1.12, upgrades.ballspeed || 0);
+  const baseR = Math.max(6, W * 0.017);
   balls = [{
     x: W / 2, y: paddle.y - 8,
     vx: bSpeed * (Math.random() > 0.5 ? 1 : -1),
     vy: -bSpeed,
-    r: Math.max(6, W * 0.017),
+    r: baseR,
+    baseR,
     fire: false,
+    big: false,
+    bomb: false,
+    golden: !!upgrades.golden_ball,
     launched: false
   }];
 
   items = [];
+  chargeReady.bomb  = Math.max(chargeReady.bomb,  upgrades.bomb_charge  || 0);
+  chargeReady.split = Math.max(chargeReady.split, upgrades.split_charge || 0);
+  dragonAnim = null; magnetHeld = false;
+  renderUpgradePanel();
   // Clear all running timers before resetting
   if (activeEffects) {
     Object.values(activeEffects).forEach(e => {
@@ -437,18 +783,395 @@ function initGame(full = true) {
   updateHUD();
 }
 
+// ===== レイアウト用データ（ドット絵 16列×18行 / '.'=空き）=====
+const SHAPES = {
+  smile: { name: '😀 SMILE', rows: [
+    '.......oo.......',
+    '.....ooyyoo.....',
+    '....ooyyyyoo....',
+    '....oyyyyyyo....',
+    '....yyyyyyyy....',
+    '...oyykyykyyo...',
+    '...oyykyykyyo...',
+    '...oyykyykyyo...',
+    '...oyyyyyyyyo...',
+    '...oyyyyyyyyo...',
+    '...oykyyyykyo...',
+    '...oykkyykkyo...',
+    '...oyykkkkyyo...',
+    '....yyykkyyy....',
+    '....oyyyyyyo....',
+    '....ooyyyyoo....',
+    '.....ooyyoo.....',
+    '.......oo.......'
+  ] },
+  banana: { name: '🍌 BANANA', rows: [
+    '...........bb...',
+    '...........bb...',
+    '..........yyyy..',
+    '..........yyyy..',
+    '.b.......yyyyy..',
+    '.b.......yyyyy..',
+    '.yy.....yyyyyy..',
+    '.yy.....yyyyyy..',
+    '..yyy..yyyyyyy..',
+    '..yyy..yyyyyyy..',
+    '..yyyyyyyyyyyy..',
+    '..yyyyyyyyyyyy..',
+    '...yyyyyyyyyy...',
+    '...yyyyyyyyyy...',
+    '....yyyyyyyy....',
+    '....yyyyyyyy....',
+    '......yyyy......',
+    '......yyyy......'
+  ] },
+  heart: { name: '❤️ HEART', rows: [
+    '...rrrr..rrrr...',
+    '...rrrrrrrrrr...',
+    '..rrrrrrrrrrrr..',
+    '..rrrrrrrrrrrr..',
+    '..rrrrrrrrrrrr..',
+    '..rrrprrrrrrrr..',
+    '..rrrprrrrrrrr..',
+    '..rrrrrrrrrrrr..',
+    '..rrrrrrrrrrrr..',
+    '..rrrrrrrrrrrr..',
+    '...rrrrrrrrrr...',
+    '...rrrrrrrrrr...',
+    '...rrrrrrrrrr...',
+    '....rrrrrrrr....',
+    '....rrrrrrrr....',
+    '.....rrrrrr.....',
+    '......rrrr......',
+    '......rrrr......'
+  ] },
+  apple: { name: '🍎 APPLE', rows: [
+    '................',
+    '..........g.....',
+    '.........gg.....',
+    '........ggg.....',
+    '................',
+    '.....rrkkrr.....',
+    '....rrrrrrrr....',
+    '....rprrrrrr....',
+    '...rrprrrrrrr...',
+    '...rrrrrrrrrr...',
+    '...rrrrrrrrrr...',
+    '...rrrrrrrrrr...',
+    '....rrrrrrrr....',
+    '....rrrrrrrr....',
+    '....rrrrrrrr....',
+    '.....rrrrrr.....',
+    '.......rr.......',
+    '................'
+  ] },
+  ghost: { name: '👻 GHOST', rows: [
+    '......wwww......',
+    '.....wwwwww.....',
+    '.....wwwwww.....',
+    '....wwwwwwww....',
+    '....wwwwwwww....',
+    '....wwkwwkww....',
+    '....wwkwwkww....',
+    '....wwkwwkww....',
+    '....wwwwwwww....',
+    '....ppwwwwpp....',
+    '....wwwkkwww....',
+    '....wwwwwwww....',
+    '....wwwwwwww....',
+    '....ww.ww.ww....',
+    '................',
+    '................',
+    '................',
+    '................'
+  ] },
+  rainbow: { name: '🌈 RAINBOW', rows: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.......rr.......',
+    '.....rrrrrr.....',
+    '....rroooorr....',
+    '...rrooyyoorr...',
+    '...rooyyyyoor...',
+    '..rroyggggyorr..',
+    '..royggggggyor..',
+    '..roygccccgyor..',
+    '..roygcvvcgyor..',
+    '.roygcvvvvcgyor.',
+    '.roygcv..vcgyor.',
+    '................',
+    '................',
+    '................'
+  ] },
+  star: { name: '⭐ STAR', rows: [
+    '.......yy.......',
+    '.......yy.......',
+    '......yyyy......',
+    '......yyyy......',
+    '.yyyyyyyyyyyyyy.',
+    '.yyyyyyyyyyyyyy.',
+    '..yyyyyyyyyyyy..',
+    '..yyyyyyyyyyyy..',
+    '...yyyyyyyyyy...',
+    '...yyyyyyyyyy...',
+    '....yyyyyyyy....',
+    '....yyyyyyyy....',
+    '...yyyyyyyyyy...',
+    '...yyyyyyyyyy...',
+    '..yyyyy..yyyyy..',
+    '..yyyyy..yyyyy..',
+    '..yyy......yyy..',
+    '..yyy......yyy..'
+  ] },
+  sun: { name: '☀️ SUN', rows: [
+    '.......oo.......',
+    '.......oo.......',
+    '...o...oo...o...',
+    '...o...oo...o...',
+    '....o.yyyy.o....',
+    '....o.yyyy.o....',
+    '.....yyyyyy.....',
+    '.....yyyyyy.....',
+    '.oo.yyyyyyyy.oo.',
+    '.oo.yyyyyyyy.oo.',
+    '.....yyyyyy.....',
+    '.....yyyyyy.....',
+    '....o.yyyy.o....',
+    '....o.yyyy.o....',
+    '...o...oo...o...',
+    '...o...oo...o...',
+    '.......oo.......',
+    '.......oo.......'
+  ] },
+  cherry: { name: '🍒 CHERRY', rows: [
+    '................',
+    '.........gggg...',
+    '.........gggg...',
+    '........gg......',
+    '........gg......',
+    '.......g..g.....',
+    '.......g..g.....',
+    '......g....g....',
+    '......g....g....',
+    '.....g......g...',
+    '.....g......g...',
+    '..rprrr..rprrr..',
+    '..rprrr..rprrr..',
+    '..rrrrr..rrrrr..',
+    '..rrrrr..rrrrr..',
+    '...rrr....rrr...',
+    '...rrr....rrr...',
+    '................'
+  ] },
+  invader: { name: '👾 INVADER', rows: [
+    '................',
+    '....g......g....',
+    '....g......g....',
+    '.....g....g.....',
+    '.....g....g.....',
+    '....gggggggg....',
+    '....gggggggg....',
+    '...ggg.gg.ggg...',
+    '...ggg.gg.ggg...',
+    '..gggggggggggg..',
+    '..gggggggggggg..',
+    '..g.gggggggg.g..',
+    '..g.gggggggg.g..',
+    '..g.g......g.g..',
+    '..g.g......g.g..',
+    '.....gg..gg.....',
+    '.....gg..gg.....',
+    '................'
+  ] },
+  skull: { name: '💀 SKULL', rows: [
+    '....wwwwwwww....',
+    '....wwwwwwww....',
+    '...wwwwwwwwww...',
+    '...wwwwwwwwww...',
+    '..wwwwwwwwwwww..',
+    '..wwwwwwwwwwww..',
+    '..wwkkkwwkkkww..',
+    '..wwkkkwwkkkww..',
+    '..wwkkkwwkkkww..',
+    '..wwkkkwwkkkww..',
+    '..wwwwwwwwwwww..',
+    '..wwwwwwwwwwww..',
+    '...wwwwkkwwww...',
+    '...wwwwkkwwww...',
+    '....wwwwwwww....',
+    '....wwwwwwww....',
+    '....w.w..w.w....',
+    '....w.w..w.w....'
+  ] },
+  cat: { name: '🐱 CAT', rows: [
+    '.oo..........oo.',
+    '.oo..........oo.',
+    '..ooo......ooo..',
+    '..ooo......ooo..',
+    '..oooooooooooo..',
+    '..oooooooooooo..',
+    '.oooooooooooooo.',
+    '.oooooooooooooo.',
+    '.ooggooooooggoo.',
+    '.ooggooooooggoo.',
+    '.ooggooooooggoo.',
+    '.ooggooooooggoo.',
+    '.ooooooppoooooo.',
+    '.ooooooppoooooo.',
+    '..ooookkkkoooo..',
+    '..ooookkkkoooo..',
+    '...oooooooooo...',
+    '...oooooooooo...'
+  ] },
+  mushroom: { name: '🍄 MUSHROOM', rows: [
+    '.....rrrrrr.....',
+    '.....rrrrrr.....',
+    '...rrrrrrrrrr...',
+    '...rrrrrrrrrr...',
+    '..rrwwrrrrwwrr..',
+    '..rrwwrrrrwwrr..',
+    '.rrrwwrrrrwwrrr.',
+    '.rrrwwrrrrwwrrr.',
+    '.rrrrrrwwrrrrrr.',
+    '.rrrrrrwwrrrrrr.',
+    '.rrrrrrrrrrrrrr.',
+    '.rrrrrrrrrrrrrr.',
+    '.....ssssss.....',
+    '.....ssssss.....',
+    '.....ssssss.....',
+    '.....ssssss.....',
+    '....ssssssss....',
+    '....ssssssss....'
+  ] },
+  rocket: { name: '🚀 ROCKET', rows: [
+    '.......rr.......',
+    '.......rr.......',
+    '......rrrr......',
+    '......rrrr......',
+    '.....wwccww.....',
+    '.....wwccww.....',
+    '.....wwccww.....',
+    '.....wwccww.....',
+    '.....wwwwww.....',
+    '.....wwwwww.....',
+    '....rwwwwwwr....',
+    '....rwwwwwwr....',
+    '....r.wwww.r....',
+    '....r.wwww.r....',
+    '......oooo......',
+    '......oooo......',
+    '.......oo.......',
+    '.......oo.......'
+  ] },
+  crown: { name: '👑 CROWN', rows: [
+    '................',
+    '................',
+    '.y.....yy.....y.',
+    '.y.....yy.....y.',
+    '.yy...yyyy...yy.',
+    '.yy...yyyy...yy.',
+    '.yyy.yyyyyy.yyy.',
+    '.yyy.yyyyyy.yyy.',
+    '.yyyyyyyyyyyyyy.',
+    '.yyyyyyyyyyyyyy.',
+    '.yyryyyyyyyyryy.',
+    '.yyryyyyyyyyryy.',
+    '.yyyyyyyyyyyyyy.',
+    '.yyyyyyyyyyyyyy.',
+    '.oooooooooooooo.',
+    '.oooooooooooooo.',
+    '................',
+    '................'
+  ] },
+  robot: { name: '🤖 ROBOT', rows: [
+    '.......nn.......',
+    '.......nn.......',
+    '....cccccccc....',
+    '....cccccccc....',
+    '...cccccccccc...',
+    '...cccccccccc...',
+    '...cyyccccyyc...',
+    '...cyyccccyyc...',
+    '...cyyccccyyc...',
+    '...cyyccccyyc...',
+    '...cccccccccc...',
+    '...cccccccccc...',
+    '...ckkkkkkkkc...',
+    '...ckkkkkkkkc...',
+    '...ckckkkkckc...',
+    '...ckckkkkckc...',
+    '....cccccccc....',
+    '....cccccccc....'
+  ] },
+  fish: { name: '🐟 FISH', rows: [
+    '................',
+    '................',
+    '.......cccc.....',
+    '.......cccc.....',
+    '....c.cccccc....',
+    '....c.cccccc....',
+    '...ccccccccccc..',
+    '...ccccccccccc..',
+    '..cccccccccckcc.',
+    '..cccccccccckcc.',
+    '...ccccccccccc..',
+    '...ccccccccccc..',
+    '....c.wwwwww....',
+    '....c.wwwwww....',
+    '.......wwww.....',
+    '.......wwww.....',
+    '................',
+    '................'
+  ] },
+};
+
+const SHAPE_PAL = {
+  y: ['#ffe14d', '#d9a900'], b: ['#9c6a3a', '#5e3a18'], k: ['#2d2d3d', '#15151f'], w: ['#f4f4fa', '#b9bad0'],
+  r: ['#ff5a4d', '#b52a22'], g: ['#4cd37a', '#26914f'], p: ['#ff9ccf', '#d95fa0'], o: ['#ffa03a', '#c26410'],
+  c: ['#52e0f2', '#1f9ab0'], v: ['#b27cf0', '#6d41ad'], s: ['#ffd9b0', '#d9a56e'], n: ['#3a73e8', '#1e45a0'],
+};
+const BG_PAL = [['#3b4066', '#262a46'], ['#3a3355', '#241f3b'], ['#2f4560', '#1d2d42']];
+let lastLayoutKey = null, currentLayoutName = '';
+function shade(hex, k) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgb(${((n >> 16) & 255) * k | 0},${((n >> 8) & 255) * k | 0},${(n & 255) * k | 0})`;
+}
+
+// 左右対称のインクブロット（セルオートマトンで有機的な形を作る）
+function genInkblot(rows) {
+  const half = COLS / 2;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    let g = [];
+    for (let r = 0; r < rows; r++) { g[r] = []; for (let c = 0; c < half; c++) g[r][c] = Math.random() < 0.6; }
+    for (let it = 0; it < 2; it++) {
+      const at = (r, c) => (r < 0 || r >= rows || c < 0) ? false : g[r][c >= half ? 2 * half - 1 - c : c];
+      const n = g.map(row => row.slice());
+      for (let r = 0; r < rows; r++) for (let c = 0; c < half; c++) {
+        let cnt = 0;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dr || dc) && at(r + dr, c + dc)) cnt++;
+        n[r][c] = cnt >= 5 || (cnt === 4 && g[r][c]);
+      }
+      g = n;
+    }
+    const cells = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < half; c++) if (g[r][c]) {
+      cells.push({ r, c, ch: '#' }); cells.push({ r, c: COLS - 1 - c, ch: '#' });
+    }
+    if (cells.length >= rows * COLS * 0.35) return cells;
+  }
+  const cells = []; // 保険：全面
+  for (let r = 0; r < rows; r++) for (let c = 0; c < COLS; c++) cells.push({ r, c, ch: '#' });
+  return cells;
+}
+
 function buildBricks() {
   const W = canvas.width, H = canvas.height;
   bricks = [];
   const totalW = W - BRICK_PAD * 2;
   const bw = (totalW - BRICK_PAD * (COLS - 1)) / COLS;
-  const bh = bw * 0.38;
-  const startY = H * 0.1;
-
-  const rowsTable  = [9,10,11,11,12,12,13,13,14,14];
-  const hp2Table   = [0, 0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55];
-  const rows    = rowsTable[Math.min(stage - 1, 9)];
-  const hp2Rate = hp2Table[Math.min(stage - 1, 9)];
+  const hp2Rate = Math.min((stage - 1) * 0.04, 0.7);
 
   const palette = [
     ['#c0392b','#922b21'],['#e67e22','#a04000'],['#f1c40f','#9a7d0a'],
@@ -456,64 +1179,99 @@ function buildBricks() {
     ['#16a085','#0e6655'],['#d35400','#a04000'],
   ];
   const hp2color = ['#4a4a6a','#2a2a4a'];
+  const pick = arr => arr[(Math.random() * arr.length) | 0];
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < COLS; c++) {
-      let skip = false;
-      const cx = COLS / 2 - 0.5; // center x
-      const cy = rows / 2 - 0.5; // center y
-      const dx = Math.abs(c - cx);
-      const dy = Math.abs(r - cy);
+  // ---------- レイアウト決定 ----------
+  const cells = [];      // { r, c, ch }  ch: 色キー / '#'=ランダム色 / '_'=背景ブロック
+  let rows, kind, pat = -1;
+  const roll = stage === 1 ? 0 : Math.random();
 
-      if (stage === 2) {
-        // 外側間引き：外側1列・1行を50%欠け
-        if ((c < 1 || c >= COLS - 1 || r < 1) && Math.random() < 0.5) skip = true;
-      } else if (stage === 3) {
-        // チェッカー外枠
-        const isBorder = c < 2 || c >= COLS - 2 || r < 2 || r >= rows - 2;
-        if (isBorder && (r + c) % 2 === 0) skip = true;
-      } else if (stage === 4) {
-        // 中央密集：外側2列は70%欠け
-        if ((c < 2 || c >= COLS - 2) && Math.random() < 0.7) skip = true;
-      } else if (stage === 5) {
-        // ダイヤ型の穴：中央付近にひし形の空白
-        if (dx + dy < 3.5) skip = true;
-      } else if (stage === 6) {
-        // X字型の穴
-        if (Math.abs(dx - dy) < 1.2 && dx < 5) skip = true;
-      } else if (stage === 7) {
-        // 市松模様
-        if ((r + c) % 2 === 0) skip = true;
-      } else if (stage === 8) {
-        // 外枠HP2の壁：外周はHP2確定、内側ランダム
-        // skipなし、HP2は後で決める
-      } else if (stage === 9) {
-        // 密集：端1列のみ50%欠け
-        if ((c === 0 || c === COLS - 1) && Math.random() < 0.5) skip = true;
+  if (roll < 0.70) {
+    // ===== ドット絵（顔・バナナ・ハート…）=====
+    kind = 'shape';
+    const keys = Object.keys(SHAPES);
+    let k;
+    do { k = pick(keys); } while (k === lastLayoutKey && keys.length > 1);
+    lastLayoutKey = k;
+    const sh = SHAPES[k];
+    currentLayoutName = sh.name;
+    rows = sh.rows.length;
+    const flip = Math.random() < 0.5; // 左右反転でバリエーション
+    const bgP = Math.min(0.10 + (stage - 1) * 0.012, 0.55); // 進むほど背景ブロックが増える
+    for (let r = 0; r < rows; r++) {
+      const line = flip ? sh.rows[r].split('').reverse().join('') : sh.rows[r];
+      for (let c = 0; c < COLS; c++) {
+        const ch = line[c];
+        if (ch !== '.') cells.push({ r, c, ch });
+        else if (Math.random() < bgP) cells.push({ r, c, ch: '_' });
       }
-      // stage 10: 全面びっしり (skipなし)
-
-      if (skip) continue;
-
-      const isItem = Math.random() < ITEM_CHANCE;
-      // stage 8: 外周は強制HP2
-      const isBorderBrick = (c < 2 || c >= COLS - 2 || r < 2 || r >= rows - 2);
-      const forceHp2 = stage === 8 && isBorderBrick;
-      const hp = (!isItem && (forceHp2 || Math.random() < hp2Rate)) ? 2 : 1;
-      const clr = hp === 2 ? hp2color : palette[Math.floor(Math.random() * palette.length)];
-
-      bricks.push({
-        x: BRICK_PAD + c * (bw + BRICK_PAD),
-        y: startY + r * (bh + BRICK_PAD),
-        w: bw, h: bh,
-        alive: true,
-        isItem,
-        hp,
-        row: r,
-        color: clr,
-        baseColor: clr
-      });
     }
+  } else if (roll < 0.85) {
+    kind = 'blob'; currentLayoutName = '🎨 INKBLOT';
+    rows = Math.min(13 + Math.floor((stage - 1) / 4), 18);
+    cells.push(...genInkblot(rows));
+  } else if (roll < 0.93) {
+    kind = 'islands'; currentLayoutName = '🏝️ ISLANDS';
+    rows = 15;
+    const chs = ['y', 'r', 'g', 'c', 'v', 'o', 'p'];
+    const blobs = [];
+    const n = 4 + ((Math.random() * 3) | 0);
+    for (let i = 0; i < n; i++) blobs.push({
+      cx: 1.5 + Math.random() * (COLS - 3), cy: 2 + Math.random() * (rows - 4),
+      rx: 2 + Math.random() * 2.6, ry: 1.6 + Math.random() * 2.2, ch: pick(chs),
+    });
+    for (let r = 0; r < rows; r++) for (let c = 0; c < COLS; c++) {
+      let ch = null;
+      for (const bl of blobs) if (((c - bl.cx) / bl.rx) ** 2 + ((r - bl.cy) / bl.ry) ** 2 <= 1) ch = bl.ch;
+      if (ch) cells.push({ r, c, ch });
+    }
+  } else {
+    kind = 'classic'; currentLayoutName = '▦ CLASSIC';
+    pat = (Math.random() * 10) | 0;
+    rows = Math.min(11 + Math.floor((stage - 1) / 2), 20);
+    const cx = COLS / 2 - 0.5, cy = rows / 2 - 0.5;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < COLS; c++) {
+      let skip = false;
+      const dx = Math.abs(c - cx), dy = Math.abs(r - cy);
+      if (pat === 1) { if ((c < 1 || c >= COLS - 1 || r < 1) && Math.random() < 0.5) skip = true; }
+      else if (pat === 2) { const isB = c < 2 || c >= COLS - 2 || r < 2 || r >= rows - 2; if (isB && (r + c) % 2 === 0) skip = true; }
+      else if (pat === 3) { if ((c < 2 || c >= COLS - 2) && Math.random() < 0.7) skip = true; }
+      else if (pat === 4) { if (dx + dy < 3.5) skip = true; }
+      else if (pat === 5) { if (Math.abs(dx - dy) < 1.2 && dx < 5) skip = true; }
+      else if (pat === 6) { if ((r + c) % 2 === 0) skip = true; }
+      else if (pat === 8) { if ((c === 0 || c === COLS - 1) && Math.random() < 0.5) skip = true; }
+      else if (pat === 9) { if (Math.abs(dx - dy) > 1.5 && Math.abs(dx + dy - rows / 2) > 1.5) skip = true; }
+      if (!skip) cells.push({ r, c, ch: '#' });
+    }
+  }
+
+  // ---------- ブロック生成 ----------
+  const classic = kind === 'classic';
+  const bh = bw * (classic ? 0.38 : 0.58);   // ドット絵は縦長ブロックで形が潰れないように
+  const startY = H * (classic ? 0.1 : 0.085);
+  for (const { r, c, ch } of cells) {
+    const isItem = Math.random() < ITEM_CHANCE;
+    const border = (c < 2 || c >= COLS - 2 || r < 2 || r >= rows - 2);
+    const tough = !isItem && ((pat === 7 && border) || Math.random() < hp2Rate);
+    let clr;
+    if (classic) clr = tough ? hp2color : pick(palette);
+    else if (ch === '#') clr = pick(palette);
+    else if (ch === '_') clr = pick(BG_PAL);
+    else clr = SHAPE_PAL[ch];
+    bricks.push({
+      x: BRICK_PAD + c * (bw + BRICK_PAD),
+      y: startY + r * (bh + BRICK_PAD),
+      w: bw, h: bh,
+      alive: true,
+      isItem,
+      hp: tough ? 2 : 1,
+      tough,
+      row: r,
+      color: clr,
+      baseColor: clr,
+      itemTint: (isItem && !classic) ? clr : null,                       // アイテムは絵の色のまま金枠＋★
+      crackColor: classic ? null : [shade(clr[0], 0.55), shade(clr[1], 0.55)]
+    });
   }
 }
 
@@ -521,7 +1279,20 @@ function buildBricks() {
 function drawBrick(b) {
   if (!b.alive) return;
   const grd = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-  if (b.isItem) {
+  if (b.isItem && b.itemTint) {
+    grd.addColorStop(0, b.itemTint[0]);
+    grd.addColorStop(1, b.itemTint[1]);
+    ctx.fillStyle = grd;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${b.h * 0.6}px Courier New`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('★', b.x + b.w / 2, b.y + b.h / 2);
+  } else if (b.isItem) {
     grd.addColorStop(0, '#3a2f00');
     grd.addColorStop(1, '#1a1500');
     ctx.fillStyle = grd;
@@ -544,7 +1315,7 @@ function drawBrick(b) {
       ctx.strokeStyle = 'rgba(180,180,255,0.7)';
       ctx.lineWidth = 2;
       ctx.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
-    } else if (b.hp === 1 && b.baseColor && b.baseColor[0] === '#4a4a6a') {
+    } else if (b.hp === 1 && (b.tough || (b.baseColor && b.baseColor[0] === '#4a4a6a'))) {
       // Damaged HP2: crack lines
       ctx.strokeStyle = 'rgba(255,100,100,0.6)';
       ctx.lineWidth = 1;
@@ -582,6 +1353,16 @@ function drawPaddle() {
   } else {
     ctx.fillStyle = '#e0e0e0';
     ctx.fillRect(p.x, p.y, p.w, p.h);
+  }
+  // ダブルバー
+  if (upgrades.multipaddle) {
+    const offset = p.h * 3;
+    ctx.fillStyle = '#34d399';
+    ctx.fillRect(p.x + p.w * 0.1, p.y - offset, p.w * 0.8, p.h * 0.7);
+    ctx.strokeStyle = 'rgba(52,211,153,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p.x + p.w * 0.1, p.y - offset, p.w * 0.8, p.h * 0.7);
+    // 当たり判定も追加（moveBalls内では既存paddleに統合済み）
   }
   if (p.hasShield) {
     const H = canvas.height;
@@ -659,6 +1440,31 @@ function drawBalls() {
         ctx.fillStyle = 'rgba(255,240,180,0.8)';
         ctx.fill();
         ctx.shadowBlur = 0;
+      } else if (b.golden) {
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        const gGrad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        gGrad.addColorStop(0, '#ffffff');
+        gGrad.addColorStop(0.4, '#ffd700');
+        gGrad.addColorStop(1, '#f97316');
+        ctx.fillStyle = gGrad;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else if (b.big) {
+        // 紫グロー
+        ctx.shadowColor = '#c77dff';
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        const bigGrad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        bigGrad.addColorStop(0, '#ffffff');
+        bigGrad.addColorStop(0.5, '#e0aaff');
+        bigGrad.addColorStop(1, '#c77dff');
+        ctx.fillStyle = bigGrad;
+        ctx.fill();
+        ctx.shadowBlur = 0;
       } else {
         ctx.beginPath();
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
@@ -688,7 +1494,7 @@ function getAudio() {
   return audioCtx;
 }
 
-function playSound(type) {
+function playSound(type, arg) {
   try {
     const ac = getAudio();
     const o = ac.createOscillator();
@@ -722,14 +1528,22 @@ function playSound(type) {
         g2.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
         o2.start(t); o2.stop(t + 0.05);
         break;
-      case 'brick':
+      case 'brick': {
+        // コンボ数ごとにペンタトニックで1音ずつ上昇（ド→レ→ミ→ソ→ラ→ド…）
+        const SC = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31];
+        const idx = Math.min(Math.max((arg || 1) - 1, 0), SC.length - 1);
+        const f = 523.25 * Math.pow(2, SC[idx] / 12);
         o.type = 'triangle';
-        o.frequency.setValueAtTime(440 + Math.random() * 200, t);
-        o.frequency.exponentialRampToValueAtTime(220, t + 0.1);
+        o.frequency.setValueAtTime(f, t);
         g.gain.setValueAtTime(0.2, t);
-        g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-        o.start(t); o.stop(t + 0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        o.start(t); o.stop(t + 0.14);
+        const o2 = ac.createOscillator(), g2 = ac.createGain(); // キラッとする倍音
+        o2.type = 'sine'; o2.frequency.setValueAtTime(f * 2, t);
+        g2.gain.setValueAtTime(0.07, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+        o2.connect(g2); g2.connect(ac.destination); o2.start(t); o2.stop(t + 0.1);
         break;
+      }
       case 'item':
         o.type = 'sine';
         o.frequency.setValueAtTime(600, t);
@@ -780,17 +1594,207 @@ function playSound(type) {
   } catch(e) {}
 }
 
+// ===== BGM（ジェネレーティブ：コンボでテンポ＆楽器が増える）=====
+const bgm = { timer: null, step: 0, next: 0, muted: false, out: null, noise: null };
+function bgmOut() {
+  const ac = getAudio();
+  if (!bgm.out) { bgm.out = ac.createGain(); bgm.out.gain.value = 0.4; bgm.out.connect(ac.destination); }
+  if (!bgm.noise) {
+    const len = Math.floor(ac.sampleRate * 0.5);
+    bgm.noise = ac.createBuffer(1, len, ac.sampleRate);
+    const d = bgm.noise.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return bgm.out;
+}
+function bgmTone(type, freq, t, dur, vol, lp) {
+  const ac = getAudio();
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  let node = o;
+  if (lp) { const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp; o.connect(f); node = f; }
+  node.connect(g); g.connect(bgmOut());
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function bgmNoise(t, dur, vol, hp) {
+  const ac = getAudio();
+  const s = ac.createBufferSource(), g = ac.createGain(), f = ac.createBiquadFilter();
+  s.buffer = bgm.noise; f.type = 'highpass'; f.frequency.value = hp;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  s.connect(f); f.connect(g); g.connect(bgmOut());
+  s.start(t); s.stop(t + dur + 0.02);
+}
+function bgmKick(t) {
+  const ac = getAudio();
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.13);
+  g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+  o.connect(g); g.connect(bgmOut()); o.start(t); o.stop(t + 0.18);
+}
+const BGM_BASS  = [110, 87.31, 130.81, 98];                                         // Am F C G
+const BGM_CHORD = [[220, 261.63, 329.63], [174.61, 220, 261.63], [261.63, 329.63, 392], [196, 246.94, 293.66]];
+function bgmStep(step, t) {
+  const lv = combo >= 8 ? 3 : combo >= 5 ? 2 : combo >= 2 ? 1 : 0;   // 盛り上がり段階
+  const bar = Math.floor(step / 16) % 4, s = step % 16;
+  if (s % 4 === 0) bgmKick(t);
+  if (s % 8 === 4 && lv >= 1) bgmNoise(t, 0.09, 0.22, 1800);                           // スネア
+  if (s % 2 === 0 || lv >= 2) bgmNoise(t, 0.03, lv >= 1 ? 0.10 : 0.06, 7000);          // ハット
+  if (s % 2 === 0) bgmTone('sawtooth', BGM_BASS[bar] * (s % 8 === 6 ? 2 : 1), t, 0.17, 0.16, 700); // ベース
+  if ((lv >= 1 && s % 2 === 1) || lv >= 2) {                                            // アルペジオ
+    const ch = BGM_CHORD[bar];
+    const n = ch[(s >> (lv >= 2 ? 0 : 1)) % 3] * (lv >= 3 && s % 4 === 3 ? 4 : 2);
+    bgmTone('square', n, t, 0.11, lv >= 2 ? 0.05 : 0.035, 3500);
+  }
+  if (lv >= 3 && s === 0) bgmNoise(t, 0.5, 0.14, 3000);                                 // クラッシュ
+}
+function bgmBpm() {
+  const t = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+  return Math.min(116 + Math.min(combo, 12) * 5 + Math.min(t / 600, 1) * 24 + Math.min(stage - 1, 20) * 0.6, 190);
+}
+function bgmTick() {
+  try {
+    const ac = getAudio();
+    if (bgm.muted || gameState !== 'playing') { bgm.next = ac.currentTime + 0.05; return; }
+    if (bgm.next < ac.currentTime) bgm.next = ac.currentTime + 0.05;
+    while (bgm.next < ac.currentTime + 0.12) {
+      bgmStep(bgm.step, bgm.next);
+      bgm.next += 60 / bgmBpm() / 4;
+      bgm.step = (bgm.step + 1) % 64;
+    }
+  } catch (e) {}
+}
+function startBGM() {
+  try {
+    const ac = getAudio();
+    if (ac.state === 'suspended') ac.resume();
+    bgmOut();
+    if (!bgm.timer) { bgm.next = ac.currentTime + 0.05; bgm.step = 0; bgm.timer = setInterval(bgmTick, 25); }
+  } catch (e) {}
+}
+function toggleMute() {
+  bgm.muted = !bgm.muted;
+  const b = document.getElementById('muteBtn');
+  if (b) b.textContent = bgm.muted ? '🔇 BGM OFF [ M ]' : '🔊 BGM ON [ M ]';
+}
+
+// ===== ヒットストップ / ズームパンチ / 振動 =====
+let hitStop = 0, zoomPunch = 0;
+function triggerHitStop(frames) { hitStop = Math.max(hitStop, frames); }
+function triggerZoom(a) { zoomPunch = Math.max(zoomPunch, a); }
+function vib(pattern) { try { if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern); } catch (e) {} }
+
+// ===== SCREEN EFFECTS =====
+function triggerShake(mag) {
+  screenShake.mag = Math.max(screenShake.mag, mag);
+  screenShake.decay = 0.82;
+}
+
+function triggerFlash(color, alpha) {
+  flashEffect.color = color;
+  flashEffect.alpha = Math.min(1, flashEffect.alpha + alpha);
+}
+
+function updateScreenEffects() {
+  // Shake
+  screenShake.mag *= screenShake.decay;
+  if (screenShake.mag > 0.3) {
+    screenShake.x = (Math.random() - 0.5) * screenShake.mag;
+    screenShake.y = (Math.random() - 0.5) * screenShake.mag;
+  } else {
+    screenShake.x = 0; screenShake.y = 0; screenShake.mag = 0;
+  }
+  // Flash
+  flashEffect.alpha *= 0.88;
+  // Zoom punch
+  zoomPunch *= 0.84; if (zoomPunch < 0.002) zoomPunch = 0;
+  // Vignette
+  const targetVig = combo >= 5 ? Math.min(1, (combo - 4) * 0.15) : 0;
+  vignette += (targetVig - vignette) * 0.08;
+  // Trails
+  balls.forEach(b => {
+    if (!b.launched) return;
+    ballTrails.push({ x: b.x, y: b.y, r: b.r, life: 1.0,
+      color: b.bomb ? '#ffcc33' : b.fire ? '#ff6633' : b.big ? '#c77dff' : '#ffffff' });
+  });
+  for (let i = ballTrails.length - 1; i >= 0; i--) {
+    ballTrails[i].life -= 0.12;
+    if (ballTrails[i].life <= 0) ballTrails.splice(i, 1);
+  }
+}
+
+function drawScreenEffects(W, H) {
+  // Flash
+  if (flashEffect.alpha > 0.01) {
+    ctx.save();
+    ctx.globalAlpha = flashEffect.alpha;
+    ctx.fillStyle = flashEffect.color;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  // Vignette (combo + time)
+  if (vignette > 0.01) {
+    const elapsedD = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+    const tRatio = Math.min(elapsedD / 600, 1.0);
+    let col;
+    if (combo >= 8 || tRatio > 0.8)     col = 'rgba(180,0,0,';
+    else if (combo >= 5 || tRatio > 0.5) col = 'rgba(120,40,0,';
+    else if (tRatio > 0.3)               col = 'rgba(80,0,80,';
+    else                                 col = 'rgba(0,0,80,';
+    const grad = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.8);
+    grad.addColorStop(0, col + '0)');
+    grad.addColorStop(1, col + (vignette * 0.75) + ')');
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  // 時間経過でcanvasを微妙に歪ませる（70%以降）
+  const elapsedD2 = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+  const tRatio2 = Math.min(elapsedD2 / 600, 1.0);
+  if (tRatio2 > 0.7 && screenShake.mag < 1) {
+    const distort = (tRatio2 - 0.7) * 3.0 * Math.sin(Date.now() / 200);
+    ctx.save();
+    ctx.globalAlpha = (tRatio2 - 0.7) * 0.15;
+    ctx.fillStyle = `rgba(255,0,100,1)`;
+    ctx.fillRect(distort, 0, W, H);
+    ctx.restore();
+  }
+}
+
+function drawTrails() {
+  ballTrails.forEach(t => {
+    ctx.save();
+    ctx.globalAlpha = t.life * 0.35;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, t.r * t.life, 0, Math.PI * 2);
+    ctx.fillStyle = t.color;
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
 function draw() {
   const W = canvas.width, H = canvas.height;
-  // Dynamic background based on combo
   ctx.fillStyle = `rgb(${Math.round(bgColor.r)},${Math.round(bgColor.g)},${Math.round(bgColor.b)})`;
   ctx.fillRect(0, 0, W, H);
+  // Apply screen shake
+  ctx.save();
+  ctx.translate(screenShake.x, screenShake.y);
+  if (zoomPunch > 0) { ctx.translate(W/2, H*0.55); ctx.scale(1 + zoomPunch, 1 + zoomPunch); ctx.translate(-W/2, -H*0.55); }
+  drawTrails();
   bricks.forEach(drawBrick);
   drawPaddle();
   drawBalls();
   drawItems();
   drawParticles();
   drawBombExplosions();
+  drawOrbitBlades();
+  drawDragon();
+  ctx.restore();
+  drawScreenEffects(W, H);
   drawComboPopups();
 }
 
@@ -802,100 +1806,159 @@ function update() {
   moveItems(H);
   updateParticles();
   updateBombExplosions();
+  updateAutoFire();
+  updateMagnet();
+  updateSpeedDisplay();
+  updateScreenEffects();
   updateBgColor();
   updateComboPopups();
   checkEffectTimers();
 }
 
 function movePaddle(W) {
-  if (keys.left)  paddle.x -= paddle.speed;
-  if (keys.right) paddle.x += paddle.speed;
-  if (touchX !== null) {
-    const target = touchX - paddle.w / 2;
-    const dx = target - paddle.x;
-    paddle.x += dx * 0.25;
+  if (autoPlay) {
+    // ターゲット：最も近いボールのX座標を追いかける
+    const activeBalls = balls.filter(b => b.launched);
+    if (activeBalls.length > 0) {
+      // 一番下にあるボール（最も危険）を優先
+      const target = activeBalls.reduce((a, b) => b.y > a.y ? b : a);
+      const center = paddle.x + paddle.w / 2;
+      const diff = target.x - center;
+      // ちょっと不完全にして人間らしくする（±10pxのブレ）
+      const humanOffset = (Math.sin(Date.now() / 300) * 10);
+      const speed = paddle.speed * 1.1;
+      if (Math.abs(diff + humanOffset) > 2) {
+        paddle.x += Math.sign(diff + humanOffset) * Math.min(speed, Math.abs(diff + humanOffset));
+      }
+    }
+    if (Math.random() < 0.01) useCharge();
+    // 未発射ボールを自動発射
+    balls.forEach(b => { if (!b.launched) b.launched = true; });
+    if (startTime === 0 && balls.some(b => b.launched)) startTime = Date.now();
+  } else {
+    if (keys.left)  paddle.x -= paddle.speed;
+    if (keys.right) paddle.x += paddle.speed;
+    if (touchX !== null) {
+      const target = touchX - paddle.w / 2;
+      const dx = target - paddle.x;
+      paddle.x += dx * 0.25;
+    }
   }
   paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
   paddle.shieldY = paddle.y + paddle.h;
 }
 
 function moveBalls(W, H) {
+  // 時間経過スピードアップ：30秒ごとに5%加速、最大2倍
+  const elapsed = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+  const timeBoost = Math.min(1 + elapsed * 0.0017, 2.0);
   balls.forEach((ball, bi) => {
     if (!ball.launched) {
       ball.x = paddle.x + paddle.w / 2;
       ball.y = paddle.y - ball.r - 1;
       return;
     }
-    ball.x += ball.vx;
-    ball.y += ball.vy;
+    if (ball.stuck) return;
+    ball.x += ball.vx * timeBoost;
+    ball.y += ball.vy * timeBoost;
 
     // Wall bounce
     if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
     if (ball.x + ball.r > W) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
     if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
 
-    // Paddle hit
+    // Paddle hit (+ multipaddle 2段目)
+    const pad2y = upgrades.multipaddle ? paddle.y - paddle.h * 3 : null;
+    const hitPad2 = pad2y !== null && ball.vy > 0 &&
+        ball.x > paddle.x + paddle.w*0.1 && ball.x < paddle.x + paddle.w*0.9 &&
+        ball.y + ball.r > pad2y && ball.y - ball.r < pad2y + paddle.h * 0.7;
     if (ball.vy > 0 &&
         ball.x > paddle.x && ball.x < paddle.x + paddle.w &&
-        ball.y + ball.r > paddle.y && ball.y - ball.r < paddle.y + paddle.h) {
+        ball.y + ball.r > paddle.y && ball.y - ball.r < paddle.y + paddle.h || hitPad2) {
       const rel = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
       const angle = rel * 60 * Math.PI / 180;
       const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
       ball.vx = speed * Math.sin(angle);
       ball.vy = -Math.abs(speed * Math.cos(angle));
-      ball.y = paddle.y - ball.r;
+      ball.y = hitPad2 ? pad2y - ball.r : paddle.y - ball.r;
+      ball._pierced = 0;
       playSound('hit');
     }
 
     // Brick collision
-    bricks.forEach(br => {
-      if (!br.alive) return;
-      if (ball.x + ball.r > br.x && ball.x - ball.r < br.x + br.w &&
-          ball.y + ball.r > br.y && ball.y - ball.r < br.y + br.h) {
-        if (!ball.fire) {
-          const overlapL = (ball.x + ball.r) - br.x;
-          const overlapR = (br.x + br.w) - (ball.x - ball.r);
-          const overlapT = (ball.y + ball.r) - br.y;
-          const overlapB = (br.y + br.h) - (ball.y - ball.r);
-          const minX = Math.min(overlapL, overlapR);
-          const minY = Math.min(overlapT, overlapB);
-          if (minX < minY) ball.vx *= -1; else ball.vy *= -1;
-        }
-        br.hp--;
-        if (br.hp > 0) {
-          // HP2 damaged: change color to cracked state
-          br.color = ['#2a2a2a', '#111111'];
-          playSound('hard');
-          spawnParticles(br, true);
-        } else {
-          br.alive = false;
-          playSound('brick');
-          // Combo
-          combo++;
-          const multiplier = Math.min(combo, 8);
-          const pts = 10 * multiplier;
-          score += pts;
-          updateHUD();
-          resetComboTimer();
-          if (multiplier >= 2) showComboPopup(br.x + br.w/2, br.y + br.h/2, combo, pts);
-          // Particles
-          spawnParticles(br);
-          if (br.isItem) spawnItem(br);
-          // Bomb: destroy surrounding 3-block radius and consume effect
-          if (ball.bomb) {
-            ball.bomb = false;
-            removeEffect('bomb');
-            explodeBricks(br);
-          }
+    const nowT = performance.now();
+    const pierceMax = getPierceCount();
+    let bounced = false;
+    for (let k = 0; k < bricks.length; k++) {
+      const br = bricks[k];
+      if (!br.alive) continue;
+      if (!(ball.x + ball.r > br.x && ball.x - ball.r < br.x + br.w &&
+            ball.y + ball.r > br.y && ball.y - ball.r < br.y + br.h)) continue;
+      if (br._lh && nowT - br._lh < 80) continue; // 連続ヒット防止
+      br._lh = nowT;
+
+      // 反射 / 貫通
+      if (!ball.fire) {
+        if ((ball._pierced || 0) < pierceMax) {
+          ball._pierced = (ball._pierced || 0) + 1;
+        } else if (!bounced) {
+          ball._pierced = 0;
+          bounced = true;
+          const oL = (ball.x + ball.r) - br.x, oR = (br.x + br.w) - (ball.x - ball.r);
+          const oT = (ball.y + ball.r) - br.y, oB = (br.y + br.h) - (ball.y - ball.r);
+          if (Math.min(oL, oR) < Math.min(oT, oB)) ball.vx *= -1; else ball.vy *= -1;
         }
       }
-    });
+
+      br.hp--;
+      if (br.hp > 0) {
+        br.color = br.crackColor || ['#2a2a2a', '#111111'];
+        playSound('hard');
+        triggerShake(5);
+        triggerFlash('#aaaaff', 0.1);
+        triggerHitStop(1); vib(8);
+        spawnParticles(br, true);
+        continue;
+      }
+      br.alive = false;
+      bricksDestroyed++;
+      triggerShake(3 + Math.min(combo * 0.3, 5));
+      if (bricksDestroyed % 50 === 0) {
+        triggerFlash('#ffffff', 0.4);
+        triggerShake(15);
+        triggerHitStop(4); triggerZoom(0.07); vib([30, 20, 60]);
+        pulseCabinetLed('#ffffff', 3);
+        showComboPopup(canvas.width/2, canvas.height * 0.35, 0, 0, `💥 ${bricksDestroyed} BREAK!!`);
+      }
+      combo++;
+      playSound('brick', combo);
+      const multiplier = Math.min(combo, 8);
+      const goldenMult = upgrades.golden_ball ? 1.5 : 1;
+      const pts = Math.round(10 * multiplier * goldenMult);
+      score += pts;
+      updateHUD();
+      checkUpgradeTrigger();
+      resetComboTimer();
+      if (multiplier >= 2) showComboPopup(br.x + br.w/2, br.y + br.h/2, combo, pts, null, upgrades.golden_ball ? '#ffd700' : null);
+      if (multiplier >= 5) { triggerShake(5 + multiplier); triggerFlash('#ffdd44', 0.12 + multiplier * 0.01); }
+      if (multiplier >= 8) { triggerFlash('#ffffff', 0.3); triggerShake(8 + multiplier * 1.5); }
+      if (combo >= 10) triggerFlash('#ff00cc', 0.2);
+      if (combo >= 5) { triggerZoom(Math.min(0.012 + combo * 0.0015, 0.035)); vib(10); }
+      if (combo >= 5 && combo % 5 === 0) { triggerHitStop(combo % 10 === 0 ? 6 : 3); triggerZoom(combo % 10 === 0 ? 0.09 : 0.055); vib([25, 15, 40]); }
+      spawnParticles(br);
+      if (br.isItem) spawnItem(br);
+      applyUpgradeEffectsOnHit(br);
+      if (ball.bomb) {
+        ball.bomb = false;
+        removeEffect('bomb');
+        explodeBricks(br);
+      }
+    }
 
     // Out of bounds
-    if (ball.y - ball.r > H) {
-      balls.splice(bi, 1);
-    }
+    if (ball.y - ball.r > H) ball._dead = true;
   });
+  balls = balls.filter(b => !b._dead);
 
   if (balls.length === 0) {
     if (paddle.hasShield) {
@@ -905,6 +1968,10 @@ function moveBalls(W, H) {
     } else {
       combo = 0; updateComboDisplay();
       playSound('miss');
+      setCabinetLed('#ff0000', 2.5, 800);
+      triggerShake(12);
+      triggerFlash('#ff0000', 0.35);
+      triggerZoom(0.06); vib([80, 40, 120]);
       lives--;
       updateHUD();
       if (lives <= 0) {
@@ -922,14 +1989,19 @@ function moveBalls(W, H) {
 
 function respawnBall() {
   const W = canvas.width, H = canvas.height;
-  const sp = H * 0.006;
+  const sp = H * 0.012 * Math.pow(1.12, upgrades.ballspeed || 0);
+  const br2 = Math.max(6, W * 0.017);
   balls = [{
     x: paddle.x + paddle.w / 2,
     y: paddle.y - 10,
     vx: sp * (Math.random() > 0.5 ? 1 : -1),
     vy: -sp,
-    r: Math.max(6, W * 0.017),
-    fire: false,
+    r: activeEffects['big'] ? br2 * 2.5 : br2,
+    baseR: br2,
+    fire: !!activeEffects['thru'],
+    big: !!activeEffects['big'],
+    bomb: !!activeEffects['bomb'],
+    golden: !!upgrades.golden_ball,
     launched: false
   }];
 }
@@ -956,13 +2028,14 @@ function spawnItem(br) {
     ...Array(12).fill('thru'),
     ...Array(12).fill('shield'),
     ...Array(5).fill('bomb'),
+    ...Array(15).fill('big'),
   ];
   const type = weightedPool[Math.floor(Math.random() * weightedPool.length)];
   items.push({
     x: br.x + br.w / 2,
     y: br.y + br.h / 2,
     w: W * 0.07, h: H * 0.03,
-    vy: H * 0.004,
+    vy: H * 0.008,
     type
   });
 }
@@ -970,8 +2043,10 @@ function spawnItem(br) {
 // ===== POWERUP EFFECTS =====
 function applyPowerup(id) {
   playSound('item');
+  triggerFlash('#ffffff', 0.08);
   const pu = POWERUPS.find(p => p.id === id);
   if (!pu) return;
+  setCabinetLed(pu.color, 2.0, 600);
 
   // Clear existing timer for same effect
   if (activeEffects[id]) {
@@ -1004,7 +2079,7 @@ function applyPowerup(id) {
           });
         });
       });
-      balls.push(...newBalls);
+      balls.push(...newBalls.slice(0, Math.max(0, 24 - balls.length)));
       break;
     }
     case 'thru':
@@ -1016,6 +2091,9 @@ function applyPowerup(id) {
       break;
     case 'bomb':
       balls.forEach(b => b.bomb = true);
+      break;
+    case 'big':
+      balls.forEach(b => { b.r = b.baseR * 2.5; b.big = true; });
       break;
   }
 
@@ -1045,12 +2123,418 @@ function applyPowerup(id) {
   }
 }
 
+// ===== UPGRADE SYSTEM =====
+function getUpgradeChoices() {
+  const pool = [];
+  UPGRADE_DEFS.forEach(u => {
+    const w = RARITY_WEIGHT[u.rarity];
+    for (let i = 0; i < w; i++) pool.push(u.id);
+  });
+  const chosen = [];
+  const tried = new Set();
+  while (chosen.length < 3 && tried.size < pool.length) {
+    const id = pool[Math.floor(Math.random() * pool.length)];
+    if (!tried.has(id)) { tried.add(id); chosen.push(id); }
+  }
+  return chosen;
+}
+
+function showUpgradeSelect() {
+  upgradeSelectOpen = true;
+  if (!pauseStart) pauseStart = Date.now();
+  if (gameState === 'playing') { upgradeResume = true; gameState = 'upgrade'; cancelAnimationFrame(animId); }
+  else if (gameState !== 'upgrade') { upgradeResume = false; }
+  const choices = getUpgradeChoices();
+  const container = document.getElementById('upgrade-cards');
+  const overlay   = document.getElementById('upgrade-overlay');
+  container.innerHTML = '';
+  choices.forEach(id => {
+    const def = UPGRADE_DEFS.find(u => u.id === id);
+    const lv  = (upgrades[id] || 0) + 1;
+    const card = document.createElement('div');
+    card.className = 'upgrade-card';
+    card.style.setProperty('--card-color', def.color);
+    card.style.borderColor = def.color;
+    card.innerHTML = `
+      <div class="up-icon">${def.icon}</div>
+      <div class="up-rarity" style="color:${RARITY_COLOR[def.rarity]}">${RARITY_LABEL[def.rarity]}</div>
+      <div class="up-name">${def.label}</div>
+      <div class="up-desc">${def.desc}</div>
+      <div class="up-level" style="color:${def.color}">Lv ${lv}</div>
+    `;
+    card.addEventListener('click', () => applyUpgrade(id));
+    container.appendChild(card);
+  });
+  overlay.style.display = 'flex';
+  if (autoPlay) setTimeout(() => { if (upgradeSelectOpen) applyUpgrade(choices[Math.floor(Math.random() * choices.length)]); }, 700);
+}
+
+function applyUpgrade(id) {
+  upgrades[id] = (upgrades[id] || 0) + 1;
+  const lv = upgrades[id];
+  const def = UPGRADE_DEFS.find(u => u.id === id);
+
+  // 効果適用
+  switch(id) {
+    case 'ballspeed':
+      balls.forEach(b => { b.vx *= 1.12; b.vy *= 1.12; });
+      break;
+    case 'wide_forever':
+      paddle.baseW = paddle.baseW * 1.15;
+      if (!activeEffects['wide']) paddle.w = paddle.baseW;
+      break;
+    case 'bomb_charge':
+      chargeReady.bomb++;
+      break;
+    case 'split_charge':
+      chargeReady.split++;
+      break;
+    case 'magnet':
+      break; // moveBalls内で処理
+    case 'golden_ball':
+      balls.forEach(b => { b.golden = true; });
+      break;
+  }
+
+  // 演出
+  triggerFlash(def.color, 0.4);
+  triggerShake(8);
+  pulseCabinetLed(def.color, 4);
+  showComboPopup(canvas.width/2, canvas.height*0.4, 0, 0, `${def.icon} ${def.label} Lv${lv}!`);
+
+  document.getElementById('upgrade-overlay').style.display = 'none';
+  upgradeSelectOpen = false;
+  pendingUpgrades = Math.max(0, pendingUpgrades - 1);
+  renderUpgradePanel();
+  if (pendingUpgrades > 0) { showUpgradeSelect(); return; }
+  if (startTime > 0 && pauseStart) startTime += Date.now() - pauseStart; // 停止中の時間を加速計算から除外
+  pauseStart = 0;
+  // ステージクリア/ゲームオーバー中に選択した場合は再開しない（二重クリア防止）
+  if (upgradeResume && gameState === 'upgrade') {
+    upgradeResume = false;
+    gameState = 'playing';
+    if (animId) cancelAnimationFrame(animId);
+    loop();
+  }
+}
+
+function renderUpgradePanel() {
+  const panel = document.getElementById('upgrade-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  Object.entries(upgrades).forEach(([id, lv]) => {
+    const def = UPGRADE_DEFS.find(u => u.id === id);
+    if (!def) return;
+    const b = document.createElement('div');
+    b.className = 'up-badge';
+    b.style.color = def.color;
+    b.style.borderColor = def.color;
+    let label = `${def.icon}${def.label} Lv${lv}`;
+    if (id === 'bomb_charge')  label += ` x${chargeReady.bomb}`;
+    if (id === 'split_charge') label += ` x${chargeReady.split}`;
+    b.textContent = label;
+    panel.appendChild(b);
+  });
+  updateActionBar();
+}
+
+function checkUpgradeTrigger() {
+  const threshold = Math.floor(score / 10000);
+  if (threshold > lastUpgradeThreshold) {
+    pendingUpgrades += threshold - lastUpgradeThreshold; // 一気に複数回跨いでも取りこぼさない
+    lastUpgradeThreshold = threshold;
+    if (!upgradeSelectOpen && gameState === 'playing') showUpgradeSelect();
+  }
+}
+
+// ===== BRICK HELPERS =====
+function killBrick(b, pts) {
+  if (!b.alive) return;
+  b.alive = false;
+  bricksDestroyed++;
+  score += pts;
+  spawnParticles(b);
+  if (b.isItem) spawnItem(b);
+}
+function damageBrick(b, pts, cooldown) {
+  const now = performance.now();
+  if (cooldown && b._lh && now - b._lh < cooldown) return false;
+  b._lh = now;
+  b.hp--;
+  if (b.hp > 0) { b.color = b.crackColor || ['#2a2a2a', '#111111']; spawnParticles(b, true); return false; }
+  killBrick(b, pts);
+  return true;
+}
+function sparkAt(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 3;
+    particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, decay: 0.05, r: 1.5 + Math.random() * 2, color });
+  }
+}
+
+// ===== UPGRADE EFFECTS IN GAME =====
+function applyUpgradeEffectsOnHit(br) {
+  const bx = br.x + br.w/2, by = br.y + br.h/2;
+
+  // サンダー：隣接ブロックにダメージ
+  if (upgrades.thunder) {
+    const range = br.w * 1.8 * Math.min(upgrades.thunder, 3);
+    let zapped = false;
+    bricks.forEach(b => {
+      if (!b.alive) return;
+      const dx = (b.x+b.w/2) - bx, dy = (b.y+b.h/2) - by;
+      if (Math.sqrt(dx*dx+dy*dy) < range && Math.random() < 0.6) {
+        damageBrick(b, 5, 0);
+        sparkAt(b.x + b.w/2, b.y + b.h/2, '#fbbf24', 6);
+        zapped = true;
+      }
+    });
+    if (zapped) { sparkAt(bx, by, '#ffffff', 8); updateHUD(); }
+  }
+
+  // 炸裂付与
+  if (upgrades.explode && Math.random() < 0.1 * upgrades.explode) {
+    explodeBricks(br);
+  }
+
+  // ドラゴン
+  if (upgrades.dragon) {
+    dragonHitCount++;
+    const needed = Math.max(10, 50 - upgrades.dragon * 5);
+    if (dragonHitCount >= needed) {
+      dragonHitCount = 0;
+      spawnDragon();
+    }
+  }
+}
+
+// ===== DRAGON =====
+let dragonAnim = null;
+function spawnDragon() {
+  if (dragonAnim) return;
+  const W = canvas.width, H = canvas.height;
+  triggerFlash('#dc2626', 0.6);
+  triggerShake(20);
+  triggerHitStop(8); triggerZoom(0.12); vib([50, 30, 50, 30, 100]);
+  pulseCabinetLed('#dc2626', 6);
+  showComboPopup(W/2, H*0.35, 0, 0, '🐉 DRAGON!!');
+  playSound('bomb');
+
+  // ドラゴンが左から右に横断してブロックを薙ぎ払う
+  let dx = -W * 0.1;
+  const aliveB = bricks.filter(b => b.alive);
+  const dy = aliveB.length ? (aliveB[Math.floor(Math.random() * aliveB.length)].y) : H * 0.3;
+  const range = H * 0.12;
+  dragonAnim = { x: dx, y: dy, range, done: false };
+
+  const sweep = setInterval(() => {
+    if (!dragonAnim) { clearInterval(sweep); return; }
+    dragonAnim.x += W * 0.04;
+    // 範囲内のブロックを破壊
+    bricks.forEach(b => {
+      if (!b.alive) return;
+      const cy = b.y + b.h/2;
+      if (Math.abs(cy - dragonAnim.y) < dragonAnim.range && b.x < dragonAnim.x) {
+        killBrick(b, 10);
+      }
+    });
+    updateHUD();
+    if (dragonAnim.x > W * 1.1) {
+      clearInterval(sweep);
+      dragonAnim = null;
+    }
+  }, 16);
+}
+
+// ===== ORBIT BLADE =====
+function drawOrbitBlades() {
+  if (!upgrades.orbit_blade) return;
+  orbitAngle += 0.08;
+  const bladeCount = upgrades.orbit_blade + 1;
+  balls.forEach(b => {
+    if (!b.launched) return;
+    const orbitR = b.r * 3;
+    for (let i = 0; i < bladeCount; i++) {
+      const angle = orbitAngle + (i / bladeCount) * Math.PI * 2;
+      const bx = b.x + Math.cos(angle) * orbitR;
+      const by = b.y + Math.sin(angle) * orbitR;
+
+      // ブレードが当たったブロックを破壊
+      bricks.forEach(br => {
+        if (!br.alive) return;
+        if (bx > br.x && bx < br.x+br.w && by > br.y && by < br.y+br.h) {
+          if (damageBrick(br, 5, 200)) updateHUD();
+        }
+      });
+
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#e879f9';
+      ctx.shadowColor = '#e879f9';
+      ctx.shadowBlur = 8;
+      ctx.translate(bx, by);
+      ctx.rotate(angle + Math.PI/4);
+      ctx.fillRect(-4, -1, 8, 2);
+      ctx.restore();
+    }
+  });
+}
+
+// ===== DRAGON DRAW =====
+function drawDragon() {
+  if (!dragonAnim) return;
+  const { x, y } = dragonAnim;
+  ctx.save();
+  ctx.font = `${Math.floor(canvas.width * 0.12)}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#dc2626';
+  ctx.shadowBlur = 20;
+  ctx.fillText('🐉', x, y);
+  ctx.restore();
+}
+
+// AUTO FIRE（一定間隔でファイヤーボール化）
+function updateAutoFire() {
+  if (!upgrades.auto_fire) return;
+  const lv = upgrades.auto_fire;
+  autoFireTimer++;
+  const interval = Math.max(420 - lv * 50, 180);   // フレーム数
+  const duration = (60 + lv * 20) * 16.7;          // ms
+  const now = performance.now();
+  if (autoFireTimer >= interval) {
+    autoFireTimer = 0;
+    balls.forEach(b => { if (b.launched) { b.fire = true; b._fireUntil = now + duration; } });
+    showComboPopup(canvas.width/2, canvas.height*0.55, 0, 0, '🔥 FIRE!');
+  }
+  balls.forEach(b => {
+    if (b._fireUntil && now > b._fireUntil) { b._fireUntil = 0; if (!activeEffects['thru']) b.fire = false; }
+  });
+}
+
+// MAGNET（Z長押しで吸着 → 離すと発射）
+let magnetHeld = false;
+function setMagnet(on) {
+  if (on && !upgrades.magnet) return;
+  magnetHeld = on;
+  if (!on) releaseMagnet();
+}
+function releaseMagnet() {
+  balls.forEach(b => {
+    if (!b.stuck) return;
+    b.stuck = false;
+    const ang = (b._off || 0) * 60 * Math.PI / 180;
+    const spd = b._spd || Math.hypot(b.vx, b.vy);
+    b.vx = spd * Math.sin(ang);
+    b.vy = -Math.abs(spd * Math.cos(ang));
+  });
+}
+function updateMagnet() {
+  if (!upgrades.magnet) return;
+  const range = paddle.h * (6 + 3 * upgrades.magnet);
+  balls.forEach(b => {
+    if (!b.launched) return;
+    if (magnetHeld && !b.stuck && b.vy > 0 && b.y > paddle.y - range && b.y < paddle.y) {
+      b.stuck = true;
+      b._spd = Math.hypot(b.vx, b.vy);
+      b._off = Math.max(-0.9, Math.min(0.9, (b.x - (paddle.x + paddle.w/2)) / (paddle.w/2)));
+    }
+    if (b.stuck) {
+      b.x = paddle.x + paddle.w/2 + b._off * paddle.w/2;
+      b.y = paddle.y - b.r - 1;
+    }
+  });
+}
+
+// CHARGE ITEMS
+function useChargeBomb() {
+  if (gameState !== 'playing' || chargeReady.bomb <= 0) return false;
+  const live = balls.filter(b => b.launched);
+  if (!live.length) return false;
+  chargeReady.bomb--;
+  live.forEach(b => b.bomb = true);
+  showComboPopup(canvas.width/2, canvas.height*0.45, 0, 0, '💣 BOMB READY!');
+  playSound('item'); triggerFlash('#ff6b6b', 0.2);
+  renderUpgradePanel();
+  return true;
+}
+function useChargeSplit() {
+  if (gameState !== 'playing' || chargeReady.split <= 0) return false;
+  const live = balls.filter(b => b.launched && !b.stuck);
+  if (!live.length || balls.length >= 24) return false;
+  chargeReady.split--;
+  const add = [];
+  live.forEach(b => {
+    const speed = Math.hypot(b.vx, b.vy);
+    [-0.5, 0.5].forEach(o => add.push({ ...b, vx: b.vx + speed * o, vy: b.vy, _pierced: 0 }));
+  });
+  balls.push(...add.slice(0, 24 - balls.length));
+  showComboPopup(canvas.width/2, canvas.height*0.45, 0, 0, '✦ SPLIT!');
+  playSound('item'); triggerFlash('#a78bfa', 0.2);
+  renderUpgradePanel();
+  return true;
+}
+function useCharge() { return useChargeBomb() || useChargeSplit(); }
+
+function updateActionBar() {
+  const bar = document.getElementById('action-bar');
+  if (!bar) return;
+  const sb = !!upgrades.bomb_charge, ss = !!upgrades.split_charge, sm = !!upgrades.magnet;
+  const eb = document.getElementById('actBomb'), es = document.getElementById('actSplit'), em = document.getElementById('actMagnet');
+  eb.style.display = sb ? 'inline-block' : 'none';
+  es.style.display = ss ? 'inline-block' : 'none';
+  em.style.display = sm ? 'inline-block' : 'none';
+  eb.textContent = `💣 BOMB x${chargeReady.bomb}`;
+  es.textContent = `✦ SPLIT x${chargeReady.split}`;
+  eb.classList.toggle('ready', chargeReady.bomb > 0);
+  es.classList.toggle('ready', chargeReady.split > 0);
+  bar.style.display = (sb || ss || sm) ? 'flex' : 'none';
+}
+
+let speedTick = 0;
+function updateSpeedDisplay() {
+  if (++speedTick % 10) return;
+  const el = document.getElementById('speedVal');
+  if (!el) return;
+  const t = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+  const m = Math.min(1 + (stage - 1) * 0.04, 3) * Math.min(1 + t * 0.0017, 2) * Math.pow(1.12, upgrades.ballspeed || 0);
+  el.textContent = 'x' + m.toFixed(2);
+}
+
+// ===== PIERCE (貫通カウンタ付き当たり判定) =====
+function getPierceCount() {
+  let n = 0;
+  if (upgrades.pierce) n += upgrades.pierce;
+  if (upgrades.golden_ball) n += upgrades.golden_ball * 3;
+  return n;
+}
+
 // ===== PARTICLES =====
+function shatterBrick(br, n) {
+  if (particles.length > 500) return; // 負荷対策
+  const col = br.color ? br.color : ['#ffffff', '#cccccc'];
+  for (let k = 0; k < n; k++) {
+    const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4; // 上向き扇状に飛ばす
+    const sp = 2.5 + Math.random() * 4.5;
+    particles.push({
+      shard: true,
+      x: br.x + Math.random() * br.w, y: br.y + Math.random() * br.h,
+      vx: Math.cos(a) * sp + (Math.random() - 0.5) * 2, vy: Math.sin(a) * sp,
+      w: br.w * (0.18 + Math.random() * 0.22), h: br.h * (0.35 + Math.random() * 0.4),
+      rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.5,
+      life: 1.0, decay: 0.010 + Math.random() * 0.012,
+      color: col[Math.random() < 0.6 ? 0 : 1], r: 0
+    });
+  }
+}
+
 function spawnParticles(br, half = false) {
+  if (particles.length > 650) return; // 負荷対策
   const cx = br.x + br.w / 2;
   const cy = br.y + br.h / 2;
   const col = br.color ? br.color[0] : '#ffffff';
-  const count = half ? 4 : 10;
+  shatterBrick(br, half ? 3 : 9);
+  const count = half ? 3 : 5;
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 / count) * i + Math.random() * 0.4;
     const speed = 1.5 + Math.random() * 2.5;
@@ -1119,11 +2603,21 @@ function drawBombExplosions() {
 }
 
 function updateParticles() {
+  const W = canvas.width, H = canvas.height;
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.08; // gravity
+    if (p.shard) {
+      p.vy += 0.28; p.rot += p.vr;
+      if (p.x < 0 || p.x > W) { p.vx *= -0.6; p.x = Math.max(0, Math.min(W, p.x)); }
+      if (p.y > H - 2 && p.vy > 0) { // 床でバウンド
+        p.y = H - 2; p.vy *= -0.45; p.vx *= 0.7; p.vr *= 0.7;
+        if (Math.abs(p.vy) < 0.8) p.vy = 0;
+      }
+    } else {
+      p.vy += 0.08; // gravity
+    }
     p.life -= p.decay;
     if (p.life <= 0) particles.splice(i, 1);
   }
@@ -1131,11 +2625,19 @@ function updateParticles() {
 
 function drawParticles() {
   particles.forEach(p => {
-    ctx.globalAlpha = p.life;
+    ctx.globalAlpha = p.shard ? Math.min(1, p.life * 1.5) : p.life;
     ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
+    if (p.shard) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
   });
   ctx.globalAlpha = 1;
 }
@@ -1146,8 +2648,10 @@ function resetComboTimer() {
   comboTimer = setTimeout(() => {
     combo = 0;
     updateComboDisplay();
+    setCabinetLed('#00f0ff', 1.0);
   }, 1200);
   updateComboDisplay();
+  updateCabinetForCombo();
 }
 
 function updateComboDisplay() {
@@ -1155,26 +2659,87 @@ function updateComboDisplay() {
   if (!el) return;
   if (combo >= 2) {
     el.textContent = combo + ' COMBO';
+    const size = Math.min(10 + combo * 1.5, 28);
+    el.style.fontSize = size + 'px';
+    el.style.color = combo >= 10 ? '#ff00cc'
+                   : combo >= 8  ? '#ff2200'
+                   : combo >= 5  ? '#ff8800'
+                   : combo >= 3  ? '#f4e04d'
+                   :               '#00f0ff';
+    el.style.textShadow = `0 0 ${8 + combo * 2}px currentColor`;
     el.classList.add('active');
   } else {
     el.classList.remove('active');
   }
 }
 
-function showComboPopup(x, y, combo, pts, customText) {
-  const text = customText || ('+' + pts + (combo >= 3 ? '  x' + combo + '!!' : ''));
-  const color = customText ? '#57cc99' : combo >= 5 ? '#ff6b6b' : combo >= 3 ? '#f4e04d' : '#ffffff';
-  comboPopups.push({ x, y, text, life: 1.0, vy: -1.2, color });
+function showComboPopup(x, y, combo, pts, customText, overrideColor) {
+  const W = canvas.width, H = canvas.height;
+  if (customText) {
+    // ライフ回復などシステム通知は中央に大きく
+    comboPopups.push({
+      x: x || W/2, y: y || H/2,
+      text: customText, life: 1.0, vy: -0.8,
+      color: '#57cc99', size: W * (customText.length > 8 ? 0.05 : 0.07),
+      glow: '#57cc99', shadow: 12, spin: false, big: false
+    });
+    return;
+  }
+
+  // スコアポップ（ブロック位置・スコアに応じてサイズ変動）
+  const scoreSize = W * (0.035 + Math.min(pts / 1000, 0.05));
+  const scoreColor = overrideColor || (pts >= 80 ? '#ff6b6b' : pts >= 40 ? '#f4e04d' : '#ffffff');
+  comboPopups.push({
+    x, y: y + 10, text: '+' + pts,
+    life: 1.0, vy: -1.5,
+    color: scoreColor, size: scoreSize,
+    glow: pts >= 40 || overrideColor ? scoreColor : null,
+    shadow: pts >= 40 ? 10 : 0,
+    spin: false, big: false
+  });
+
+  // コンボ数によって中央にでっかく出す
+  if (combo >= 3) {
+    const scale = Math.min(combo, 12);
+    const size  = W * (0.08 + scale * 0.012);
+    const color = combo >= 10 ? '#ff00cc'
+                : combo >= 8  ? '#ff2200'
+                : combo >= 6  ? '#ff6600'
+                : combo >= 4  ? '#f4e04d'
+                :               '#00f0ff';
+    const glow  = color;
+    const label = combo >= 10 ? `🔥${combo} COMBO🔥`
+                : combo >= 6  ? `${combo} COMBO!!`
+                :               `${combo} COMBO`;
+    comboPopups.push({
+      x: W/2, y: H * 0.42,
+      text: label, life: 1.0, vy: -0.4,
+      color, size, glow, shadow: 20 + scale * 4,
+      spin: combo >= 8, big: combo >= 6,
+      scale: 1.0 + scale * 0.05
+    });
+  }
+}
+
+function updateCabinetForCombo() {
+  if (combo >= 8)      setCabinetLed('#ff0044', 2.0);
+  else if (combo >= 5) setCabinetLed('#ff8800', 1.8);
+  else if (combo >= 3) setCabinetLed('#ffdd00', 1.5);
+  else if (combo >= 2) setCabinetLed('#00f0ff', 1.2);
 }
 
 function updateBgColor() {
-  // Target color based on combo level
-  let tr = 7, tg = 7, tb = 13;
+  const elapsedBg = startTime > 0 ? (Date.now() - startTime) / 1000 : 0;
+  const tR = Math.min(elapsedBg / 600, 1.0);
+  // ベース色：時間経過で暗紫→暗赤に変化
+  let tr = 7  + tR * 20;
+  let tg = 7  - tR * 2;
+  let tb = 13 + tR * 5;
+  // コンボ上書き
   if (combo >= 8)      { tr=40; tg=5;  tb=5;  }
   else if (combo >= 5) { tr=30; tg=10; tb=5;  }
   else if (combo >= 3) { tr=15; tg=10; tb=5;  }
   else if (combo >= 2) { tr=8;  tg=8;  tb=18; }
-  // Lerp toward target
   bgColor.r += (tr - bgColor.r) * 0.05;
   bgColor.g += (tg - bgColor.g) * 0.05;
   bgColor.b += (tb - bgColor.b) * 0.05;
@@ -1184,22 +2749,59 @@ function updateComboPopups() {
   for (let i = comboPopups.length - 1; i >= 0; i--) {
     const p = comboPopups[i];
     p.y += p.vy;
-    p.life -= 0.025;
+    // 大きいやつはゆっくり消える
+    p.life -= p.big ? 0.016 : 0.028;
+    if (p.spin) p.angle = (p.angle || 0) + 0.04;
     if (p.life <= 0) comboPopups.splice(i, 1);
   }
 }
 
 function drawComboPopups() {
+  const W = canvas.width;
   comboPopups.forEach(p => {
-    ctx.globalAlpha = p.life;
-    ctx.fillStyle = p.color;
-    ctx.font = `bold ${Math.floor(canvas.width * 0.038)}px Courier New`;
+    ctx.save();
+    const alpha = Math.min(p.life * 1.4, 1);
+    ctx.globalAlpha = alpha;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(p.text, p.x, p.y);
+    const size = p.size || W * 0.038;
+    ctx.font = `900 ${Math.floor(size)}px Orbitron, Courier New`;
+
+    // transform
+    ctx.translate(p.x, p.y);
+    if (p.spin && p.angle) ctx.rotate(Math.sin(p.angle) * 0.06);
+    if (p.big) {
+      const pulse = 1 + 0.04 * Math.sin(Date.now() / 80);
+      ctx.scale(pulse, pulse);
+    }
+
+    // グロー：shadowBlurは1回だけ（軽量化）
+    if (p.glow) {
+      ctx.shadowColor = p.glow;
+      ctx.shadowBlur = Math.min(p.shadow, 30); // 上限30
+      ctx.fillStyle = p.glow;
+      ctx.globalAlpha = alpha * 0.35;
+      ctx.fillText(p.text, 0, 0);
+      ctx.globalAlpha = alpha;
+    }
+
+    // メインテキスト
+    ctx.shadowColor = p.glow || 'transparent';
+    ctx.shadowBlur = p.glow ? Math.min(p.shadow * 0.5, 20) : 0;
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, 0, 0);
+
+    if (p.big) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 0;
+      ctx.strokeText(p.text, 0, 0);
+    }
+    ctx.restore();
   });
   ctx.globalAlpha = 1;
   ctx.textAlign = 'left';
+  ctx.shadowBlur = 0;
 }
 
 function explodeBricks(center) {
@@ -1214,14 +2816,16 @@ function explodeBricks(center) {
     const dx = cx - ex;
     const dy = cy - ey;
     if (Math.sqrt(dx*dx + dy*dy) <= range) {
-      b.alive = false;
-      score += 10;
-      spawnParticles(b);
+      killBrick(b, 10);
     }
   });
   updateHUD();
 
   playSound('bomb');
+  pulseCabinetLed('#ff6600', 4);
+  triggerShake(20);
+  triggerFlash('#ff8800', 0.5);
+  triggerHitStop(5); triggerZoom(0.1); vib([40, 20, 80]);
   // Shockwave rings + debris particles
   bombExplosions.push({
     x: ex, y: ey,
@@ -1259,6 +2863,7 @@ function removeEffect(id) {
 
     case 'shield': paddle.hasShield = false; break;
     case 'bomb': balls.forEach(b => b.bomb = false); break;
+    case 'big':  balls.forEach(b => { b.r = b.baseR; b.big = false; }); break;
   }
   if (activeEffects[id]) { delete activeEffects[id]; }
   removeBadge(id);
@@ -1275,7 +2880,14 @@ function updateHUD() {
     lives++;
     showComboPopup(canvas.width / 2, canvas.height / 2, 0, 0, '♥ LIFE +1');
   }
-  document.getElementById('scoreVal').textContent = score;
+  // スコアを派手に点滅させる
+  const sv = document.getElementById('scoreVal');
+  if (sv) {
+    sv.textContent = score.toLocaleString();
+    sv.style.textShadow = '0 0 12px #fff';
+    clearTimeout(sv._t);
+    sv._t = setTimeout(() => { sv.style.textShadow = ''; }, 150);
+  }
   document.getElementById('livesVal').textContent = lives;
   const stEl = document.getElementById('stageVal');
   if (stEl) stEl.textContent = stage;
@@ -1301,6 +2913,8 @@ function removeBadge(id) {
 // ===== GAME LOOP =====
 function loop() {
   if (gameState !== 'playing') return;
+  if (pendingUpgrades > 0 && !upgradeSelectOpen) { showUpgradeSelect(); return; }
+  if (hitStop > 0) { hitStop--; draw(); animId = requestAnimationFrame(loop); return; } // ヒットストップ
   update();
   draw();
   animId = requestAnimationFrame(loop);
@@ -1308,6 +2922,7 @@ function loop() {
 
 // ===== GAME STATE =====
 function startGame() {
+  startBGM();
   document.getElementById('overlay').style.display = 'none';
   document.getElementById('qr-overlay').style.display = 'none';
   initGame(true);
@@ -1322,7 +2937,8 @@ function runStageIntro(stageNum, callback) {
   const el = document.getElementById('stage-intro');
   if (!el) { callback(); return; }
   const label = stageNum === 1 ? 'STAGE 1' : `STAGE ${stageNum}`;
-  el.textContent = label;
+  el.style.flexDirection = 'column';
+  el.innerHTML = `<div>${label}</div><div style="font-size:15px;letter-spacing:4px;margin-top:8px;opacity:.9">${currentLayoutName}</div>`;
 
   // Draw one frame so bricks are visible behind
   draw();
@@ -1351,25 +2967,28 @@ function runStageIntro(stageNum, callback) {
 }
 
 function endGame(result) {
+  if (gameState === 'clear' || gameState === 'dead') return; // 二重発火ガード
   gameState = result;
   cancelAnimationFrame(animId);
   if (result === 'clear') {
-    if (stage < 10) {
+    if (stage < 999) {
       // Stage clear → next stage
       playSound('clear');
+      pulseCabinetLed('#00ff88', 6);
       stage++;
       showStageClear();
     } else {
       // All clear!
       clearTime = startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
       playSound('clear');
+      pulseCabinetLed('#ffd700', 10);
       showQR();
     }
   } else {
     const ov = document.getElementById('overlay');
     ov.innerHTML = `
       <h2>GAME OVER</h2>
-      <p>STAGE ${stage} &nbsp;|&nbsp; SCORE: ${score}</p>
+      <p>STAGE ${stage} &nbsp;|&nbsp; SCORE: ${score.toLocaleString()}</p>
       <button class="btn" id="startBtn">RETRY</button>
     `;
     ov.style.display = 'flex';
@@ -1381,11 +3000,12 @@ function showStageClear() {
   const ov = document.getElementById('overlay');
   ov.innerHTML = `
     <h2>STAGE ${stage - 1} CLEAR!</h2>
-    <p style="margin-bottom:6px;">SCORE: ${score}</p>
+    <p style="margin-bottom:6px;">SCORE: ${score.toLocaleString()}</p>
     <p style="font-size:12px;color:#666;letter-spacing:2px;">STAGE ${stage} へ</p>
     <button class="btn" id="nextStageBtn">NEXT STAGE</button>
   `;
   ov.style.display = 'flex';
+  if (autoPlay) setTimeout(() => { const nb = document.getElementById('nextStageBtn'); if (nb) nb.click(); }, 900);
   document.getElementById('nextStageBtn').addEventListener('click', () => {
     ov.style.display = 'none';
     initGame(false); // keep score/lives
@@ -1440,25 +3060,41 @@ function drawDummyQR() {
 
 // ===== CONTROLS =====
 document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft')  keys.left = true;
-  if (e.key === 'ArrowRight') keys.right = true;
-  if (e.key === ' ' || e.key === 'ArrowUp') launchBall();
+  if (e.key === 'ArrowLeft')  { keys.left = true;  e.preventDefault(); }
+  if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+  if (e.key === ' ' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (!e.repeat && !launchBall()) useCharge();
+  }
+  if ((e.key === 'a' || e.key === 'A') && !e.repeat) toggleAutoPlay();
+  if ((e.key === 'm' || e.key === 'M') && !e.repeat) toggleMute();
+  if ((e.key === 'z' || e.key === 'Z') && !e.repeat) setMagnet(true);
 });
 document.addEventListener('keyup', e => {
+  if (e.key === 'z' || e.key === 'Z') setMagnet(false);
   if (e.key === 'ArrowLeft')  keys.left = false;
   if (e.key === 'ArrowRight') keys.right = false;
 });
+window.addEventListener('blur', () => { keys.left = false; keys.right = false; setMagnet(false); });
+// ボタンにフォーカスが残るとSPACEで再クリックされるのを防止
+document.addEventListener('click', e => { if (e.target && e.target.tagName === 'BUTTON') e.target.blur(); });
+
+// 画面座標 → キャンバス座標
+function toCanvasX(clientX) {
+  const r = canvas.getBoundingClientRect();
+  return (clientX - r.left) * (canvas.width / r.width);
+}
 
 // Touch drag on canvas
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
-  lastTouchX = e.touches[0].clientX;
-  touchX = e.touches[0].clientX;
+  lastTouchX = toCanvasX(e.touches[0].clientX);
+  touchX = lastTouchX;
   launchBall();
 }, { passive: false });
 canvas.addEventListener('touchmove', e => {
   e.preventDefault();
-  touchX = e.touches[0].clientX;
+  touchX = toCanvasX(e.touches[0].clientX);
 }, { passive: false });
 canvas.addEventListener('touchend', e => {
   touchX = null;
@@ -1479,11 +3115,29 @@ rightBtn.addEventListener('touchend',   e => { e.preventDefault(); keys.right = 
 rightBtn.addEventListener('mousedown',  () => keys.right = true);
 rightBtn.addEventListener('mouseup',    () => keys.right = false);
 
+document.getElementById('actBomb').addEventListener('click', useChargeBomb);
+document.getElementById('actSplit').addEventListener('click', useChargeSplit);
+(function () {
+  const mg = document.getElementById('actMagnet');
+  ['mousedown', 'touchstart'].forEach(ev => mg.addEventListener(ev, e => { e.preventDefault(); setMagnet(true); }, { passive: false }));
+  ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => mg.addEventListener(ev, e => { e.preventDefault(); setMagnet(false); }, { passive: false }));
+})();
+
+function toggleAutoPlay() {
+  autoPlay = !autoPlay;
+  const badge = document.getElementById('auto-badge');
+  if (badge) badge.style.display = autoPlay ? 'block' : 'none';
+  if (autoPlay && gameState === 'playing') {
+    balls.forEach(b => { if (!b.launched) b.launched = true; });
+  }
+}
+
 function launchBall() {
-  if (gameState !== 'playing') return;
-  const wasLaunched = balls.some(b => b.launched);
-  balls.forEach(b => { if (!b.launched) b.launched = true; });
-  if (!wasLaunched && startTime === 0) startTime = Date.now();
+  if (gameState !== 'playing') return false;
+  let did = false;
+  balls.forEach(b => { if (!b.launched) { b.launched = true; did = true; } });
+  if (did && startTime === 0) startTime = Date.now();
+  return did;
 }
 
 // Start button
